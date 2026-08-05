@@ -97,3 +97,4 @@ ISKIN is currently in the foundational engineering phase, focused on building a 
 ---
 
 *"Engineering is not the destination of ISKIN. Engineering is the language through which its scientific questions can be asked."*
+"Мы не стремимся доказать то, во что верим. Мы стремимся выяснить, что сама реальность позволяет нам доказать." - ChatGPT
