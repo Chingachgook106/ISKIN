@@ -1,0 +1,49 @@
+PS C:\WINDOWS\System32> Get-NetConnectionProfile | Select-Object
+Name                     : TP-Link_322C_5G
+InterfaceAlias           : Ethernet 4
+InterfaceIndex           : 16
+NetworkCategory          : Private
+DomainAuthenticationKind : None
+IPv4Connectivity         : Internet
+IPv6Connectivity         : NoTraffic
+PS C:\WINDOWS\System32> Get-Service LanmanServer | Select-Object Name, Status, StartType
+Name          Status StartType
+----          ------ ---------
+LanmanServer Running Automatic
+hostname
+Beelink5800H
+Get-NetFirewallRule -DisplayGroup "File and Printer Sharing" -Direction Inbound | Select-Object DisplayName, Enabled, Profile | Format-Table -AutoSize
+DisplayName                                             Enabled
+-----------                                             -------
+File and Printer Sharing (Spooler Service - RPC-EPMAP)    False
+File and Printer Sharing (Spooler Service - RPC)          False
+File and Printer Sharing (NB-Session-In)                  False
+File and Printer Sharing (Spooler Service - RPC)          False
+File and Printer Sharing (Spooler Service Worker - RPC)   False
+File and Printer Sharing (NB-Datagram-In)                 False
+File and Printer Sharing (NB-Name-In)                     False
+File and Printer Sharing (Spooler Service - RPC-EPMAP)    False
+File and Printer Sharing (NB-Name-In)                     False
+File and Printer Sharing (NB-Session-In)                  False
+File and Printer Sharing (Echo Request - ICMPv4-In)       False
+File and Printer Sharing (SMB-In)                         False
+File and Printer Sharing (SMB-In)                         False
+File and Printer Sharing (Spooler Service Worker - RPC)   False
+File and Printer Sharing (Echo Request - ICMPv6-In)       False
+File and Printer Sharing (Echo Request - ICMPv6-In)       False
+File and Printer Sharing (Echo Request - ICMPv4-In)       False
+File and Printer Sharing (LLMNR-UDP-In)                   False
+New-Item -Path "C:\iskin-exchange\incoming","C:\iskin-exchange\outgoing","C:\iskin-exchange\work" -ItemType Directory -Force
+Directory: C:\iskin-exchange
+Mode                 LastWriteTime         Length Name
+----                 ------         ---------      ------
+d-----         8/10/2026   1:22 PM                incoming
+d-----         8/10/2026   1:22 PM                outgoing
+d-----         8/10/2026   1:22 PM                work
+New-SmbShare -Name "iskin-exchange" -Path "C:\iskin-exchange" -FullAccess "indeez" -Description "ISKIN CR-001 standart file exchange"
+New-SmbShare : Access is denied.
+At line:1 char:1
++ New-SmbShare -Name "iskin-exchange" -Path "C:\iskin-exchange" -FullAc ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : PermissionDenied: (MSFT_SMBShare:ROOT/Microsoft/Windows/SMB/MSFT_SMBShare) [New-SmbShare], CimException
+    + FullyQualifiedErrorId : Windows System Error 5,New-SmbShare

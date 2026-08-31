@@ -1,0 +1,12 @@
+﻿# Исключить любые будущие секреты и ключи
+Secrets/
+*.7z
+.env
+*.pem
+*.key
+*.crt
+
+# Артефакты ОС и IDE
+Thumbs.db
+Desktop.ini
+.vscode/
