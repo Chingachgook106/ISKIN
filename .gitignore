@@ -1,12 +1,28 @@
-﻿# Исключить любые будущие секреты и ключи
-Secrets/
-*.7z
-.env
-*.pem
-*.key
-*.crt
-
-# Артефакты ОС и IDE
-Thumbs.db
-Desktop.ini
+﻿# === Сторонние AI-ассистенты и IDE (Rejected for ISKIN) ===
+.gigacode/
 .vscode/
+.idea/
+
+# === Python (Research Stack) ===
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+.venv/
+env/
+venv/
+
+# === Логи и временные файлы ===
+*.log
+*.tmp
+*.bak
+
+# === Модели и тяжелые артефакты (Храним отдельно от Git) ===
+models/
+*.gguf
+*.bin
+*.safetensors
+
+# === OS ===
+Thumbs.db
+.DS_Store
