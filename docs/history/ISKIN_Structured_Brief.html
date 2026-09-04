@@ -1,0 +1,3318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISKIN — Structured Brief & Context Compression</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="text/javascript" src="https://ff.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=YcqQj-0KUr-ow1LQ6NUHX8-QsfxCkRvLJiPMdSd5mQOBtBcXKfr3CNm-oCon8ycrXpE4Ot5d_2OQCu8pzK_yLCCeHfPsx_wDc1SrTW8SoHdvn7ea1fZNeaKkM3SdwRTSc2ELAO_BDYaQd9DzMhu7c3VaYhGOohvlNxE45W_WD2clpmq_QvdLGM1osNeIKz3c078ZcZzKaZ8cu911PAPJR_6zNMdj1Y2La4umkrFXnoo" charset="UTF-8"></script><style>
+:root {
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --ink: #111827;
+  --muted: #4b5563;
+  --line: #d1d5db;
+  --line-weak: #e5e7eb;
+  --accent: #2563eb;
+  --accent-weak: #dbe4ff;
+  --research: #7c3aed;
+  --research-weak: #ede9fe;
+  --orchestration: #2563eb;
+  --orchestration-weak: #dbe4ff;
+  --compute: #059669;
+  --compute-weak: #d1fae5;
+  --infra: #6b7280;
+  --infra-weak: #f3f4f6;
+  --warn: #d97706;
+  --warn-weak: #fef3c7;
+  --danger: #dc2626;
+  --danger-weak: #fee2e2;
+  --guidelines: #0891b2;
+  --guidelines-weak: #cffafe;
+  --benchmark: #0d9488;
+  --benchmark-weak: #ccfbf1;
+  --experiments: #4f46e5;
+  --experiments-weak: #e0e7ff;
+  --step--2: clamp(0.64rem, 0.63rem + 0.1vw, 0.72rem);
+  --step--1: clamp(0.80rem, 0.78rem + 0.12vw, 0.90rem);
+  --step-0: clamp(0.90rem, 0.88rem + 0.14vw, 1.00rem);
+  --step-1: clamp(1.10rem, 1.05rem + 0.25vw, 1.35rem);
+  --step-2: clamp(1.40rem, 1.25rem + 0.6vw, 2.00rem);
+  --step-3: clamp(1.80rem, 1.50rem + 1.2vw, 3.00rem);
+  --space: clamp(1.00rem, 0.85rem + 0.6vw, 1.50rem);
+  --radius: 10px;
+  --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 6px 18px -4px rgba(0,0,0,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Inter", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.55;
+  font-size: var(--step-0);
+}
+
+header, main, footer {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 var(--space);
+}
+
+header {
+  padding-top: calc(var(--space) * 2);
+  padding-bottom: calc(var(--space) * 1.5);
+  border-bottom: 1px solid var(--line-weak);
+  margin-bottom: calc(var(--space) * 1.5);
+}
+
+.badge-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.20rem 0.60rem;
+  border-radius: 999px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+
+.badge-accepted { background: var(--compute-weak); color: var(--compute); }
+.badge-adr { background: var(--orchestration-weak); color: var(--orchestration); }
+.badge-tz { background: var(--warn-weak); color: var(--warn); }
+.badge-hardware { background: var(--infra-weak); color: var(--infra); }
+.badge-guidelines { background: var(--guidelines-weak); color: var(--guidelines); }
+.badge-benchmark { background: var(--benchmark-weak); color: var(--benchmark); }
+.badge-experiments { background: var(--experiments-weak); color: var(--experiments); }
+
+h1 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-3);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.subtitle {
+  font-size: var(--step-1);
+  color: var(--muted);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.meta {
+  margin-top: 1rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  color: var(--muted);
+}
+
+.major-section {
+  margin-bottom: calc(var(--space) * 2.5);
+}
+
+.major-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: calc(var(--space) * 1.2);
+  padding-bottom: 0.6rem;
+  border-bottom: 2px solid var(--line-weak);
+}
+
+.major-header h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-2);
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.major-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--1);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.icon-arch { background: var(--orchestration-weak); color: var(--orchestration); }
+.icon-guide { background: var(--guidelines-weak); color: var(--guidelines); }
+.icon-bench { background: var(--benchmark-weak); color: var(--benchmark); }
+.icon-exp { background: var(--experiments-weak); color: var(--experiments); }
+
+section {
+  margin-bottom: calc(var(--space) * 1.8);
+  position: relative;
+}
+
+.section-bar {
+  position: absolute;
+  left: calc(-1 * var(--space));
+  top: 0.3rem;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+}
+
+.bar-research { background: var(--research); }
+.bar-orchestration { background: var(--orchestration); }
+.bar-compute { background: var(--compute); }
+.bar-infra { background: var(--infra); }
+.bar-warn { background: var(--warn); }
+.bar-guidelines { background: var(--guidelines); }
+.bar-benchmark { background: var(--benchmark); }
+.bar-experiments { background: var(--experiments); }
+
+h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-2);
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 0.9rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+h2 .num {
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--1);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+h3 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 600;
+  margin: 1.2rem 0 0.5rem;
+}
+
+p {
+  margin-bottom: 0.7rem;
+  max-width: 72ch;
+}
+
+.lead {
+  font-size: var(--step-1);
+  line-height: 1.45;
+  color: var(--ink);
+  margin-bottom: 1.2rem;
+}
+
+.invariant-box {
+  background: var(--orchestration-weak);
+  border: 1px solid color-mix(in oklab, var(--orchestration) 20%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+}
+
+.invariant-box p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--orchestration) 55%, var(--ink));
+  margin: 0;
+}
+
+.guideline-box {
+  background: var(--guidelines-weak);
+  border: 1px solid color-mix(in oklab, var(--guidelines) 20%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+}
+
+.guideline-box p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--guidelines) 55%, var(--ink));
+  margin: 0;
+}
+
+.benchmark-box {
+  background: var(--benchmark-weak);
+  border: 1px solid color-mix(in oklab, var(--benchmark) 20%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+}
+
+.benchmark-box p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--benchmark) 55%, var(--ink));
+  margin: 0;
+}
+
+.exp-box {
+  background: var(--experiments-weak);
+  border: 1px solid color-mix(in oklab, var(--experiments) 20%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+}
+
+.exp-box p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--experiments) 55%, var(--ink));
+  margin: 0;
+}
+
+.diagram {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+  box-shadow: var(--shadow);
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--1);
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.diagram pre { margin: 0; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space);
+}
+
+@media (max-width: 640px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.8);
+  box-shadow: var(--shadow);
+}
+
+.card h3 {
+  margin-top: 0;
+  font-size: var(--step-1);
+}
+
+.card .tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  margin-bottom: 0.6rem;
+}
+
+.tag-malysh { background: var(--orchestration-weak); color: var(--orchestration); }
+.tag-bigpc { background: var(--compute-weak); color: var(--compute); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+  margin: 0.8rem 0;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--line-weak);
+}
+
+th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: var(--step--2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+tr:last-child td { border-bottom: none; }
+
+tbody tr:hover td { background: #fafafa; }
+
+td.mono, .mono {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9em;
+}
+
+.check { color: var(--compute); font-weight: 600; }
+.cross { color: var(--danger); font-weight: 600; }
+.neutral { color: var(--infra); }
+
+.compact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.compact-list li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--line-weak);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.compact-list li:last-child { border-bottom: none; }
+
+.compact-list .label {
+  color: var(--muted);
+  font-size: var(--step--1);
+}
+
+.compact-list .value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--1);
+  text-align: right;
+}
+
+.roadmap {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+}
+
+.roadmap > li {
+  position: relative;
+  padding-left: 2.2rem;
+  padding-bottom: 1.2rem;
+  border-left: 2px solid var(--line-weak);
+  margin-left: 0.6rem;
+}
+
+.roadmap > li::before {
+  counter-increment: step;
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: -0.7rem;
+  top: -0.1rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.roadmap > li:last-child {
+  border-left-color: transparent;
+  padding-bottom: 0;
+}
+
+.roadmap strong {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 600;
+}
+
+.excluded {
+  background: var(--danger-weak);
+  border: 1px solid color-mix(in oklab, var(--danger) 15%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.7);
+}
+
+.excluded ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: var(--step--1);
+}
+
+.excluded li {
+  margin-bottom: 0.35rem;
+  color: color-mix(in oklab, var(--danger) 60%, var(--ink));
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  font-size: var(--step--1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pill .pill-label {
+  font-size: var(--step--2);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pill .pill-value {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500;
+}
+
+.principle-card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.8);
+  margin: 0.8rem 0;
+  box-shadow: var(--shadow);
+}
+
+.principle-card h3 {
+  margin-top: 0;
+  font-size: var(--step-1);
+  color: var(--guidelines);
+}
+
+.principle-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: var(--guidelines-weak);
+  color: var(--guidelines);
+  border-radius: 50%;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.priorities-list {
+  counter-reset: prio;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.priorities-list > li {
+  counter-increment: prio;
+  padding: 0.5rem 0 0.5rem 2rem;
+  border-bottom: 1px solid var(--line-weak);
+  position: relative;
+}
+
+.priorities-list > li::before {
+  content: counter(prio);
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 1.3rem;
+  height: 1.3rem;
+  background: var(--guidelines-weak);
+  color: var(--guidelines);
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.priorities-list > li:last-child { border-bottom: none; }
+
+.dont-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.dont-list li {
+  padding: 0.4rem 0 0.4rem 1.5rem;
+  position: relative;
+  border-bottom: 1px solid var(--line-weak);
+}
+
+.dont-list li::before {
+  content: "✕";
+  position: absolute;
+  left: 0;
+  color: var(--danger);
+  font-weight: 700;
+  font-size: var(--step--1);
+}
+
+.dont-list li:last-child { border-bottom: none; }
+
+.philosophy-box {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+  box-shadow: var(--shadow);
+}
+
+.philosophy-box p {
+  margin-bottom: 0.6rem;
+}
+
+.philosophy-box p:last-child {
+  margin-bottom: 0;
+}
+
+.bench-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+
+.bench-card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.8);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.bench-card .bench-label {
+  font-size: var(--step--2);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.bench-card .bench-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step-1);
+  font-weight: 500;
+  color: var(--benchmark);
+}
+
+.bench-card .bench-note {
+  font-size: var(--step--2);
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+.status-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--compute);
+  font-weight: 600;
+}
+
+.status-warn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.raw-report {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+  box-shadow: var(--shadow);
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--1);
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.raw-report pre { margin: 0; color: var(--muted); }
+
+/* Experiments specific styles */
+.exp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+
+.exp-card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.8);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.exp-card .exp-label {
+  font-size: var(--step--2);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.exp-card .exp-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step-1);
+  font-weight: 500;
+  color: var(--experiments);
+}
+
+.exp-card .exp-note {
+  font-size: var(--step--2);
+  color: var(--muted);
+  margin-top: 0.2rem;
+}
+
+.must { color: var(--compute); font-weight: 600; }
+.should { color: var(--warn); font-weight: 600; }
+.optional { color: var(--infra); font-weight: 600; }
+.reject { color: var(--danger); font-weight: 600; }
+
+footer {
+  margin-top: calc(var(--space) * 2);
+  padding-bottom: calc(var(--space) * 2);
+  font-size: var(--step--2);
+  color: var(--muted);
+  border-top: 1px solid var(--line-weak);
+  padding-top: var(--space);
+}
+
+@media print {
+  body { background: #fff; }
+  .no-print { display: none; }
+  section { page-break-inside: avoid; }
+  .major-section { page-break-inside: avoid; }
+}
+
+@page { size: A4; margin: 16mm; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+.badge-reviews { background: var(--reviews-weak); color: var(--reviews); }
+.icon-reviews { background: var(--reviews-weak); color: var(--reviews); }
+.bar-reviews { background: var(--reviews); }
+.review-source {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-right: 0.4rem;
+}
+.review-copilot { background: #dbeafe; color: #1e40af; }
+.review-perplexity { background: #dcfce7; color: #166534; }
+.review-deepseek { background: #fef3c7; color: #92400e; }
+.verdict-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8rem 0;
+  font-size: var(--step--1);
+}
+.verdict-table th {
+  background: var(--surface);
+  border-bottom: 2px solid var(--line);
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+  font-weight: 600;
+}
+.verdict-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--line-weak);
+  vertical-align: top;
+}
+.verdict-table tr:nth-child(even) { background: var(--bg); }
+.verdict-table td:first-child { font-weight: 600; white-space: nowrap; }
+.verdict-table .must { color: #166534; font-weight: 700; }
+.verdict-table .should { color: #92400e; font-weight: 700; }
+.verdict-table .optional { color: #475569; font-weight: 700; }
+.verdict-table .reject { color: #be123c; font-weight: 700; }
+.review-box {
+  background: var(--reviews-weak);
+  border: 1px solid color-mix(in oklab, var(--reviews) 20%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+}
+.review-box p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--reviews) 55%, var(--ink));
+  margin: 0;
+}
+.review-box.small p { font-size: var(--step-0); }
+.review-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin: 1rem 0 0.5rem 0;
+  flex-wrap: wrap;
+}
+.review-tab {
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.3rem;
+  font-weight: 600;
+  cursor: default;
+}
+.agreement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.agreement-card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.8);
+  box-shadow: var(--shadow);
+}
+.agreement-card h4 {
+  margin: 0 0 0.4rem 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-0);
+}
+.agreement-card .agree { color: #166534; font-weight: 700; }
+.agreement-card .disagree { color: #be123c; font-weight: 700; }
+.agreement-card .partial { color: #92400e; font-weight: 700; }
+.freeze-check {
+  columns: 2;
+  column-gap: 2rem;
+  margin: 0.8rem 0;
+}
+@media (max-width: 700px) { .freeze-check { columns: 1; } }
+.freeze-check li {
+  break-inside: avoid;
+  font-size: var(--step--1);
+  margin-bottom: 0.35rem;
+}
+
+
+.badge-cr { background: var(--cr-weak); color: var(--cr); }
+.icon-cr { background: var(--cr-weak); color: var(--cr); }
+.bar-cr { background: var(--cr); }
+.cr-box {
+  background: var(--cr-weak);
+  border: 1px solid color-mix(in oklab, var(--cr) 20%, transparent);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  margin: 1rem 0;
+}
+.cr-box p {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  font-weight: 500;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--cr) 55%, var(--ink));
+  margin: 0;
+}
+.cr-box.small p { font-size: var(--step-0); }
+.cr-status-closed {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #dcfce7;
+  color: #166534;
+}
+.cr-status-open {
+  display: inline-block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: var(--step--2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 0.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #fef3c7;
+  color: #92400e;
+}
+.cr-card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.9);
+  box-shadow: var(--shadow);
+  margin: 0.8rem 0;
+}
+.cr-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cr-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+.cr-meta-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0.5rem;
+  background: var(--bg);
+  border-radius: 0.3rem;
+  font-size: var(--step--1);
+}
+.cr-meta-item .cr-label { font-weight: 600; color: var(--muted); }
+.cr-meta-item .cr-value { font-weight: 600; font-family: "JetBrains Mono", monospace; }
+.acceptance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.acceptance-card {
+  background: var(--surface);
+  border: 1px solid var(--line-weak);
+  border-radius: var(--radius);
+  padding: calc(var(--space) * 0.8);
+  box-shadow: var(--shadow);
+  border-left: 4px solid var(--cr);
+}
+.acceptance-card h4 {
+  margin: 0 0 0.4rem 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: var(--step-0);
+}
+.acceptance-card .acc-pass { color: #166534; font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge-row">
+    <span class="badge badge-adr">ADR-001 Accepted</span>
+    <span class="badge badge-tz">Baseline TZ</span>
+    <span class="badge badge-hardware">Hardware Spec</span>
+    <span class="badge badge-guidelines">Project Guidelines</span>
+    <span class="badge badge-benchmark">Baseline-0</span>
+    <span class="badge badge-experiments">3 Experiment Sources</span>
+    <span class="badge badge-accepted">9 Sources Compressed</span>
+  </div>
+  <h1>ISKIN Structured Brief</h1>
+  <p class="subtitle">Context compression across ADR-001, engineering spec, hardware baseline, four-layer architecture, project guidelines, BASELINE-0 report and active experiments</p>
+  <div class="meta">Project ISKIN · EMS-001 «Малыш» · Four-layer architecture · Client-Server Inference · Engineering Guidelines · BASELINE-0 Verified · Active Experiments</div>
+</header>
+
+<main>
+
+<!-- ARCHITECTURE SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-arch">A</div>
+    <h2>Architecture</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-orchestration"></div>
+    <h2><span class="num">§1</span> Architectural Invariant</h2>
+    <div class="invariant-box">
+      <p>EMS-001 is an independent control and engineering node. Compute power is an external, attachable resource accessed through a machine interface. EMS-001 must remain fully operational on its minimum current hardware configuration.</p>
+    </div>
+    <p class="lead">ISKIN separates the research subject from the compute substrate. The mini-PC (EMS-001) owns state, experiment logic, memory and orchestration; the GPU workstation (Compute Node) owns inference execution only.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§2</span> Four-Layer Model</h2>
+    <div class="diagram">
+<pre>
+┌─────────────────────────────────────────┐
+│  RESEARCH LAYER                         │  hypotheses · experiments · analysis
+│  (ISKIN Core, Memory, State)            │
+└────────────────────┬────────────────────┘
+                     │ HTTP Client / API
+┌────────────────────▼────────────────────┐
+│  ORCHESTRATION LAYER                  │  planning · launch · control · logging
+│  EMS-001 «Малыш»                      │  Git · VS Code · Python · PyTorch CPU
+└────────────────────┬───────────────────┘
+                     │ LAN / SSH / API
+┌────────────────────▼────────────────────┐
+│  COMPUTE LAYER                        │  llama.cpp · llama-server · CUDA
+│  Big PC (GPU Node)                    │  OLMo 3 7B Instruct GGUF Q4_K_M
+└────────────────────┬────────────────────┘
+                     │
+┌───────────────────▼────────────────────┐
+│  INFRASTRUCTURE LAYER                 │  hardware · OS · Ethernet · storage
+└─────────────────────────────────────────┘</pre>
+    </div>
+    <p>Layers are <strong>logical boundaries</strong>, not mandatory physical separation. However, baseline policy explicitly forbids placing CUDA, llama.cpp or inference runtime on EMS-001.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-infra"></div>
+    <h2><span class="num">§3</span> Hardware Context</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>EMS-001 «Малыш»</h3>
+        <span class="tag tag-malysh">Orchestration Node</span>
+        <ul class="compact-list">
+          <li><span class="label">CPU</span> <span class="value">Ryzen 7 5800H</span></li>
+          <li><span class="label">Cores</span> <span class="value">8C / 16T</span></li>
+          <li><span class="label">RAM</span> <span class="value">16 GB DDR4</span></li>
+          <li><span class="label">GPU</span> <span class="value">Radeon Vega iGPU</span></li>
+          <li><span class="label">VRAM</span> <span class="value">shared system</span></li>
+          <li><span class="label">Storage</span> <span class="value">512 GB NVMe</span></li>
+          <li><span class="label">OS</span> <span class="value">Win 11 Pro x64</span></li>
+          <li><span class="label">Network</span> <span class="value">IPv4 only, DPI env</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Big PC — Compute Node</h3>
+        <span class="tag tag-bigpc">Compute Server</span>
+        <ul class="compact-list">
+          <li><span class="label">CPU</span> <span class="value">Ryzen 3 3200G</span></li>
+          <li><span class="label">Cores</span> <span class="value">4C / 4T</span></li>
+          <li><span class="label">RAM</span> <span class="value">32 GB DDR4</span></li>
+          <li><span class="label">GPU</span> <span class="value">RTX 4060 8 GB</span></li>
+          <li><span class="label">VRAM</span> <span class="value">8 GB dedicated</span></li>
+          <li><span class="label">Storage C:</span> <span class="value">100 GB free SSD</span></li>
+          <li><span class="label">Storage D:</span> <span class="value">931 GB free HDD</span></li>
+          <li><span class="label">Network</span> <span class="value">100 Mbps Ethernet</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-orchestration"></div>
+    <h2><span class="num">§4</span> Component Map</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>EMS-001</th>
+          <th>Big PC</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ISKIN Core / Logic</td>
+          <td class="check">✓</td>
+          <td class="cross">—</td>
+          <td>Subject state lives here</td>
+        </tr>
+        <tr>
+          <td>Python / venv</td>
+          <td class="check">✓</td>
+          <td class="cross">—</td>
+          <td>Dev environment</td>
+        </tr>
+        <tr>
+          <td>PyTorch</td>
+          <td class="check">CPU only</td>
+          <td class="cross">—</td>
+          <td>No CUDA on Малыш</td>
+        </tr>
+        <tr>
+          <td>Transformers / HF</td>
+          <td class="check">✓</td>
+          <td class="cross">—</td>
+          <td>Research stack</td>
+        </tr>
+        <tr>
+          <td>Git / VS Code</td>
+          <td class="check">✓</td>
+          <td class="cross">—</td>
+          <td>Standard tooling</td>
+        </tr>
+        <tr>
+          <td>HTTP/API Client</td>
+          <td class="check">✓</td>
+          <td class="neutral">server</td>
+          <td>OpenAI-compatible</td>
+        </tr>
+        <tr>
+          <td>CUDA / NVIDIA Driver</td>
+          <td class="cross">FORBIDDEN</td>
+          <td class="check">✓</td>
+          <td>Baseline invariant</td>
+        </tr>
+        <tr>
+          <td>llama.cpp / llama-server</td>
+          <td class="cross">—</td>
+          <td class="check">✓</td>
+          <td>Windows CUDA build</td>
+        </tr>
+        <tr>
+          <td>OLMo 3 7B Instruct GGUF</td>
+          <td class="neutral">research*</td>
+          <td class="check">✓ inference</td>
+          <td>Q4_K_M on D:/AI/Models</td>
+        </tr>
+        <tr>
+          <td>Ollama / LM Studio / vLLM</td>
+          <td class="cross">—</td>
+          <td class="cross">baseline reject</td>
+          <td>Not in freeze</td>
+        </tr>
+        <tr>
+          <td>Distributed inference</td>
+          <td class="cross">—</td>
+          <td class="cross">—</td>
+          <td>Explicitly rejected</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: var(--step--2); color: var(--muted);">* Research copy on Малыш is for architecture study only, not operational inference.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-compute"></div>
+    <h2><span class="num">§5</span> Inference Baseline</h2>
+    <div class="grid-4">
+      <div class="pill">
+        <span class="pill-label">Model</span>
+        <span class="pill-value">OLMo 3 7B Instruct</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Format</span>
+        <span class="pill-value">GGUF Q4_K_M</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Runtime</span>
+        <span class="pill-value">llama.cpp / llama-server</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">GPU</span>
+        <span class="pill-value">RTX 4060 8 GB</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Context</span>
+        <span class="pill-value">4096 tokens</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">CPU Threads</span>
+        <span class="pill-value">4</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">GPU Offload</span>
+        <span class="pill-value">max stable</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Network</span>
+        <span class="pill-value">LAN HTTP</span>
+      </div>
+    </div>
+
+    <h3>API Contract</h3>
+    <p>Minimal surface: <span class="mono">HEALTH</span>, <span class="mono">MODEL INFO</span>, <span class="mono">CHAT/COMPLETION</span>. Health check must verify three independent conditions before any research request: host reachable, inference server up, model loaded. Endpoint config (<span class="mono">LLM_HOST, LLM_PORT, LLM_MODEL, LLM_TIMEOUT</span>) lives in a single configuration layer, never hardcoded.</p>
+
+    <h3>Security</h3>
+    <p>Server listens on LAN interface only; no Internet exposure, no router port forwarding. Windows Firewall scoped to Малыш or LAN segment. Authentication optional but must not depend on external auth services. System must operate autonomously after Isolation.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-orchestration"></div>
+    <h2><span class="num">§6</span> Software Structure on EMS-001</h2>
+    <div class="diagram">
+<pre>
+ISKIN/
+├── core/          ISKIN Core logic
+├── llm/
+│   ├── client/    LLM adapter (no core logic here)
+│   ├── prompts/   Prompt templates
+│   └── context/   Context management
+├── memory/        Memory subsystem
+├── state/         Architectural state
+├── experiments/   Experiment controller
+├── observation/   Metrics & observation
+├── logs/          Structured logs
+├── config/        Single source of truth
+└── tests/         Validation suite</pre>
+    </div>
+    <p>LLM Client is a pure adapter. ISKIN Core decides what to do with the result. Direction of control is always: <strong>ISKIN → LLM → ISKIN</strong>, never the reverse.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§7</span> Benchmark & Freeze</h2>
+    <h3>Baseline-0 Report Must Include</h3>
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Required Fields</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Identity</td>
+          <td class="mono">Date, OS, llama.cpp version/commit, model filename, checksum</td>
+        </tr>
+        <tr>
+          <td>Config</td>
+          <td class="mono">Context size, CPU threads, GPU offload setting</td>
+        </tr>
+        <tr>
+          <td>Resources</td>
+          <td class="mono">VRAM before/peak, RAM before/peak</td>
+        </tr>
+        <tr>
+          <td>Performance</td>
+          <td class="mono">Prompt tokens, generated tokens, time to first token, prompt processing speed, generation speed, total latency</td>
+        </tr>
+        <tr>
+          <td>Network</td>
+          <td class="mono">API latency, end-to-end path validation</td>
+        </tr>
+        <tr>
+          <td>Stability</td>
+          <td class="mono">Errors, crashes, OOM events</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Test Sequence</h3>
+    <p><strong>A</strong> — Model load & API up & GPU detect & no OOM.<br>
+    <strong>B</strong> — Short prompt (~3 sentences), measure latency and tokens/sec.<br>
+    <strong>C</strong> — Medium prompt (500–1000 tokens), measure prompt processing and generation.<br>
+    <strong>D</strong> — Full 4096 context, verify stability and correctness.<br>
+    <strong>E</strong> — End-to-end: Малыш → HTTP → llama-server → OLMo → HTTP → Малыш.</p>
+
+    <h3>Freeze Criteria</h3>
+    <p>Freeze only after: llama.cpp installed; model verified; GPU inference works; API works; Малыш calls API; baseline benchmark saved; ISKIN Client operational; system survives reboot. Only then proceed to Memory, State, Observation and Experiment layers.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-warn"></div>
+    <h2><span class="num">§8</span> Explicitly Rejected (Baseline)</h2>
+    <div class="excluded">
+      <ul>
+        <li>Distributed inference, llama.cpp RPC, VRAM pooling across nodes</li>
+        <li>CUDA, CUDA Toolkit, NVIDIA runtime on EMS-001</li>
+        <li>Local inference on Малыш (7B model on 16 GB RAM)</li>
+        <li>Ollama, LM Studio, vLLM as baseline runtime</li>
+        <li>Kubernetes, Docker infrastructure, multi-user serving</li>
+        <li>Cloud inference, external API exposure, production-grade auth</li>
+        <li>32K/64K context optimization, fine-tuning at baseline</li>
+        <li>RDP as inference transport</li>
+        <li>Second LLM instance on Big PC</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-infra"></div>
+    <h2><span class="num">§9</span> Implementation Sequence</h2>
+    <ol class="roadmap">
+      <li><strong>Prepare Big PC</strong> — verify Windows, storage layout, network.</li>
+      <li><strong>Verify NVIDIA / CUDA</strong> — driver OK, RTX 4060 detectable.</li>
+      <li><strong>Install llama.cpp</strong> — ready Windows CUDA build, no source compile.</li>
+      <li><strong>Place model</strong> — <span class="mono">D:/AI/Models/OLMo-3-7B-Instruct-Q4_K_M.gguf</span>, verify checksum.</li>
+      <li><strong>Launch llama-server</strong> — local smoke test.</li>
+      <li><strong>Local GPU benchmark</strong> — Test A-D on Big PC directly.</li>
+      <li><strong>Configure LAN API</strong> — bind to LAN, firewall scope.</li>
+      <li><strong>Health check</strong> — independent host/server/model verification.</li>
+      <li><strong>Connect Малыш client</strong> — HTTP client, config layer, no hardcoded endpoints.</li>
+      <li><strong>End-to-end benchmark</strong> — Test E, full round-trip.</li>
+      <li><strong>Baseline-0 report</strong> — freeze all metrics.</li>
+      <li><strong>Freeze snapshot</strong> — OS, drivers, llama.cpp version, model checksum, Python env, repo commit.</li>
+      <li><strong>Validate reboot survival</strong> — all services restore automatically or with minimal scripted action.</li>
+      <li><strong>Transition to ISKIN Core</strong> — memory, state, observation, experiment layers.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="section-bar bar-orchestration"></div>
+    <h2><span class="num">§10</span> Key Constraints & Risks</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>Hard Constraints</h3>
+        <ul class="compact-list">
+          <li><span class="label">RAM ceiling</span> <span class="value">16 GB</span></li>
+          <li><span class="label">No dGPU on Малыш</span> <span class="value">iGPU only</span></li>
+          <li><span class="label">No CUDA on Малыш</span> <span class="value">policy</span></li>
+          <li><span class="label">IPv6</span> <span class="value">unavailable</span></li>
+          <li><span class="label">Network env</span> <span class="value">DPI / RKN</span></li>
+          <li><span class="label">Big PC CPU</span> <span class="value">4 threads max</span></li>
+          <li><span class="label">VRAM</span> <span class="value">8 GB</span></li>
+          <li><span class="label">Context baseline</span> <span class="value">4096</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Risk Notes</h3>
+        <ul class="compact-list">
+          <li><span class="label">OOM on 8 GB</span> <span class="value">high</span></li>
+          <li><span class="label">Model integrity</span> <span class="value">verify checksum</span></li>
+          <li><span class="label">Windows firewall</span> <span class="value">config drift</span></li>
+          <li><span class="label">LAN-only API</span> <span class="value">exposure risk</span></li>
+          <li><span class="label">DPI impact</span> <span class="value">downloads</span></li>
+          <li><span class="label">RAM upgrade</span> <span class="value">non-arch change</span></li>
+          <li><span class="label">RDP dependency</span> <span class="value">must be zero</span></li>
+          <li><span class="label">Hybrid inference</span> <span class="value">fallback only</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- GUIDELINES SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-guide">G</div>
+    <h2>Guidelines</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G1</span> Role & Goal</h2>
+    <p class="lead">Leading engineer for software-hardware preparation of the ISKIN research stand EMS-001. Scope: Windows, BIOS/UEFI, drivers, hardware diagnostics, system stability, optimization, performance, reproducible configuration.</p>
+    <div class="guideline-box">
+      <p>Prepare the Beelink mini-PC as the first compute module of EMS-001. The goal is not maximum synthetic benchmark scores, but a maximally stable, reproducible and documented compute platform suitable for long-term local AI model operation and engineering experiments.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G2</span> Core Principles</h2>
+
+    <div class="principle-card">
+      <h3><span class="principle-num">1</span>Stability over Performance</h3>
+      <p>When choosing between a small speed gain and high reliability, always choose reliability.</p>
+    </div>
+
+    <div class="principle-card">
+      <h3><span class="principle-num">2</span>Reproducibility over Uniqueness</h3>
+      <p>Every change must be repeatable on the next stand. If a setting cannot be reproduced, its value is questionable.</p>
+    </div>
+
+    <div class="principle-card">
+      <h3><span class="principle-num">3</span>No "Magic"</h3>
+      <p>Do not use random tweaks, forum advice without verification, unexplained optimizations, or changes whose rationale cannot be justified. Every recommendation must have an engineering explanation.</p>
+    </div>
+
+    <div class="principle-card">
+      <h3><span class="principle-num">4</span>Any Optimization Must Be Measurable</h3>
+      <p>Before changing anything, understand: what is being changed, why, what effect is expected, and how to verify the result.</p>
+    </div>
+
+    <div class="principle-card">
+      <h3><span class="principle-num">5</span>Document Only Verified Facts</h3>
+      <p>Do not record hypotheses as facts. Only verified solutions, confirmed results, and identified limitations are documented.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G3</span> Work Priorities</h2>
+    <ol class="priorities-list">
+      <li>Verify hardware integrity of the system.</li>
+      <li>Update BIOS (if necessary).</li>
+      <li>Install Windows.</li>
+      <li>Install all drivers.</li>
+      <li>Apply system updates.</li>
+      <li>Check thermal regime.</li>
+      <li>Check system stability.</li>
+      <li>Check performance.</li>
+      <li>Apply only justified optimizations.</li>
+      <li>Prepare system for WSL2 installation and further Linux work.</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G4</span> Decision Rule</h2>
+    <div class="guideline-box">
+      <p>When multiple solutions exist, prefer the one that is simpler, more stable, easier to maintain, easier to reproduce, and better documented.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G5</span> What Not To Do</h2>
+    <ul class="dont-list">
+      <li>Do not try to strip down Windows at any cost.</li>
+      <li>Do not disable system services without understanding the consequences.</li>
+      <li>Do not use questionable "optimizer" programs.</li>
+      <li>Do not change parameters just because "they say so".</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G6</span> Expected Result</h2>
+    <p>After completion, the stand must be:</p>
+    <div class="grid-4">
+      <div class="pill">
+        <span class="pill-label">State</span>
+        <span class="pill-value">Fully operational</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Quality</span>
+        <span class="pill-value">Stable</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Behaviour</span>
+        <span class="pill-value">Predictable</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Traceability</span>
+        <span class="pill-value">Documented</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Readiness</span>
+        <span class="pill-value">Long-term use</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Next step</span>
+        <span class="pill-value">WSL2 + local LLM</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-guidelines"></div>
+    <h2><span class="num">§G7</span> Project Philosophy</h2>
+    <div class="philosophy-box">
+      <p>EMS-001 is not just a personal computer. It is the first reference compute module of the ISKIN project.</p>
+      <p>All engineering decisions made during its setup are treated as experimental hypotheses.</p>
+      <p>If a hypothesis is confirmed by practice, it becomes part of the project standard.</p>
+      <p>If a hypothesis is not confirmed, it is documented as a failed experiment and not repeated.</p>
+      <p>The main value of the work lies not in the number of settings applied, but in understanding the reasons for applying them and the ability to reproduce the result on any subsequent stand.</p>
+      <p>Every decision must bring the project closer to creating a reproducible engineering platform for research in local AI systems.</p>
+    </div>
+  </section>
+</div>
+
+<!-- BENCHMARKS SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-bench">B</div>
+    <h2>Benchmarks</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-benchmark"></div>
+    <h2><span class="num">§B1</span> BASELINE-0 Report</h2>
+    <div class="benchmark-box">
+      <p>Official baseline verification report. The first confirmed measurement point for the ISKIN inference stack: llama.cpp b10679 (CUDA 12.4) + OLMo 3 7B Instruct Q4_K_M on RTX 4060 8 GB. All metrics captured on 2026-08-29.</p>
+    </div>
+
+    <h3>System & Runtime</h3>
+    <div class="bench-grid">
+      <div class="bench-card">
+        <span class="bench-label">Date</span>
+        <span class="bench-value">2026-08-29</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">OS</span>
+        <span class="bench-value">Windows 11 Pro</span>
+        <span class="bench-note">Build 26200</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">llama.cpp</span>
+        <span class="bench-value">b10679</span>
+        <span class="bench-note">Windows x64 CUDA 12.4</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">Model</span>
+        <span class="bench-value">OLMo-3-7B-Instruct-Q4_K_M.gguf</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">Checksum</span>
+        <span class="bench-value" style="font-size: var(--step--1);">0DE0BC63FAE8...64C5C4</span>
+        <span class="bench-note">SHA256 truncated</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">Context Size</span>
+        <span class="bench-value">4096 tokens</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">CPU Threads</span>
+        <span class="bench-value">4</span>
+      </div>
+      <div class="bench-card">
+        <span class="bench-label">GPU Offload</span>
+        <span class="bench-value">99 (full GPU)</span>
+      </div>
+    </div>
+
+    <h3>Resource Usage</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>VRAM Profile</h3>
+        <ul class="compact-list">
+          <li><span class="label">VRAM before</span> <span class="value">~1.2 GB</span></li>
+          <li><span class="label">VRAM peak</span> <span class="value">~7.5 GB</span></li>
+          <li><span class="label">Peak (nvidia-smi)</span> <span class="value">7485 MiB</span></li>
+          <li><span class="label">Headroom</span> <span class="value">~0.5 GB</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Test B — Short Prompt</h3>
+        <ul class="compact-list">
+          <li><span class="label">Prompt tokens</span> <span class="value">19</span></li>
+          <li><span class="label">Generated tokens</span> <span class="value">150</span></li>
+          <li><span class="label">Generation speed</span> <span class="value">44.38 t/s</span></li>
+          <li><span class="label">Total latency</span> <span class="value">3.38 s</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Stability & API</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Status</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Errors / crashes</td>
+          <td class="check">✓ None</td>
+          <td>Clean run, no OOM</td>
+        </tr>
+        <tr>
+          <td>RDP memory warning</td>
+          <td class="status-warn">⚠ False positive</td>
+          <td>Loading succeeded despite warning</td>
+        </tr>
+        <tr>
+          <td>API endpoint</td>
+          <td class="check">✓ 0.0.0.0:8080</td>
+          <td>Listening on all interfaces</td>
+        </tr>
+        <tr>
+          <td>Firewall scope</td>
+          <td class="check">✓ Restricted</td>
+          <td>192.168.0.102 (Малыш) only</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Raw Report</h3>
+    <div class="raw-report">
+<pre>=== BASELINE-0 REPORT ===
+Дата: 2026-08-29
+OS: Windows 11 Pro (Build 26200)
+llama.cpp version: b10679 (Windows x64 CUDA 12.4 build)
+Model filename: Olmo-3-7B-Instruct-Q4_K_M.gguf
+Model checksum (SHA256): 0DE0BC63FAE8A73A48E167BE48F149C9544BD4AF61D223CD3F331C6EA664C5C4
+Context size: 4096 tokens
+CPU threads: 4
+GPU offload setting: 99 (Фактически: полная загрузка на GPU)
+VRAM before: ~1.2 GB
+VRAM peak: ~7.5 GB (7485 MiB по nvidia-smi)
+Prompt tokens (Test B): 19
+Generated tokens (Test B): 150
+Generation speed: 44.38 tokens/sec
+Total latency (150 tokens): 3.38 s
+Errors / crashes: Нет. (Предупреждение RDP о нехватке памяти было ложным, загрузка прошла успешно).
+API Status: Listening on 0.0.0.0:8080, Firewall restricted to 192.168.0.102 (Малыш).
+=========================</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-benchmark"></div>
+    <h2><span class="num">§B2</span> BASELINE-0 Interpretation</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>Confirmed Hypotheses</h3>
+        <ul class="compact-list">
+          <li><span class="label">Full GPU offload works</span> <span class="check">✓</span></li>
+          <li><span class="label">RTX 4060 8 GB sufficient</span> <span class="check">✓</span></li>
+          <li><span class="label">llama.cpp CUDA build stable</span> <span class="check">✓</span></li>
+          <li><span class="label">Q4_K_M quality acceptable</span> <span class="check">✓</span></li>
+          <li><span class="label">LAN API operational</span> <span class="check">✓</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Open Questions</h3>
+        <ul class="compact-list">
+          <li><span class="label">Test C (medium prompt)</span> <span class="value">pending</span></li>
+          <li><span class="label">Test D (full 4096 ctx)</span> <span class="value">pending</span></li>
+          <li><span class="label">Test E (end-to-end)</span> <span class="value">pending</span></li>
+          <li><span class="label">8192 context experiment</span> <span class="value">future</span></li>
+          <li><span class="label">Thread tuning (2-4)</span> <span class="value">future</span></li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top: 1rem;">VRAM headroom is tight (~0.5 GB). RDP false-positive memory warning is a known Windows behaviour under GPU load and does not indicate actual instability. Firewall restriction to Малыш IP confirms security policy compliance.</p>
+  </section>
+</div>
+
+<!-- NETWORK SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-network">N</div>
+    <h2>Network</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-network"></div>
+    <h2><span class="num">§N1</span> RU-001 Network Model</h2>
+    <div class="network-box">
+      <p>RU-001 is a system-level protected network path below the application layer. It is not a VPN product; it is a provable security state of EMS-001.</p>
+    </div>
+    <div class="diagram">
+<pre>RU-001
+├── Internet connectivity
+├── DNS
+├── VPN / secure gateway
+├── routing policy
+├── IPv4 / IPv6
+├── Git transport (HTTPS / SSH)
+├── VS Code network
+└── verification tests</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-network"></div>
+    <h2><span class="num">§N2</span> Network Baseline (Pre-Security)</h2>
+    <div class="network-box small">
+      <p>Baseline captured on 2026-08-11. No VPN, proxy, overlay, kill-switch or firewall changes installed. Configuration was read-only. The baseline is fact, not assumption.</p>
+    </div>
+
+    <h3>Interface State</h3>
+    <table>
+      <thead>
+        <tr><th>Interface</th><th>Status</th><th>Note</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">Ethernet 4</td><td class="check">Up</td><td>Realtek GbE, 1 Gbps, active</td></tr>
+        <tr><td class="mono">Wi-Fi 2</td><td class="cross">Down (APIPA)</td><td>MediaTek MT7920, disconnected</td></tr>
+        <tr><td class="mono">Bluetooth PAN</td><td class="cross">Down (APIPA)</td><td>Disconnected</td></tr>
+        <tr><td class="mono">Wi-Fi Direct (×2)</td><td class="cross">Down (APIPA)</td><td>Virtual adapters, disconnected</td></tr>
+      </tbody>
+    </table>
+
+    <h3>IPv4 Configuration</h3>
+    <div class="grid-4">
+      <div class="pill">
+        <span class="pill-label">Active Interface</span>
+        <span class="pill-value">Ethernet 4</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">IP Address</span>
+        <span class="pill-value">192.168.0.102/24</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Gateway</span>
+        <span class="pill-value">192.168.0.1</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Origin</span>
+        <span class="pill-value">DHCP (stable)</span>
+      </div>
+    </div>
+
+    <h3>IPv6 Configuration</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>Present</h3>
+        <ul class="compact-list">
+          <li><span class="label">Link-Local</span> <span class="check">✓ fe80::/64</span></li>
+          <li><span class="label">Stack enabled</span> <span class="check">✓ OS level</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Absent</h3>
+        <ul class="compact-list">
+          <li><span class="label">Global IPv6</span> <span class="cross">✗ None</span></li>
+          <li><span class="label">Default route</span> <span class="cross">✗ ::/0 missing</span></li>
+          <li><span class="label">IPv6 DNS</span> <span class="cross">✗ Not used</span></li>
+        </ul>
+      </div>
+    </div>
+    <p style="font-size: var(--step--2); color: var(--muted);">IPv6 stack is enabled but completely inert at the network layer. Cannot be ignored in security policy.</p>
+
+    <h3>DNS</h3>
+    <div class="grid-4">
+      <div class="pill">
+        <span class="pill-label">Active DNS</span>
+        <span class="pill-value">8.8.8.8, 1.1.1.1</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Wi-Fi DNS</span>
+        <span class="pill-value">192.168.0.1 (inactive)</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">IPv6 stubs</span>
+        <span class="pill-value">fec0::1, ::2, ::3</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Resolution</span>
+        <span class="pill-value">IPv4 A-records OK</span>
+      </div>
+    </div>
+
+    <h3>Routing Table Summary</h3>
+    <div class="diagram">
+<pre>IPv4: local subnet 192.168.0.0/24, loopback 127.0.0.0/8,
+      multicast 224.0.0.0/4, broadcast 255.255.255.255/32
+      Single default route via 192.168.0.1 (metric 256)
+      No static overrides, no policy routing
+
+IPv6: link-local fe80::/64, loopback ::1/128, multicast ff00::/8
+      No global routes, no default gateway</pre>
+    </div>
+
+    <h3>External Connectivity</h3>
+    <table>
+      <thead>
+        <tr><th>Test</th><th>Result</th><th>Detail</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>General HTTPS</td><td class="check">✓ Functional</td><td>Direct IPv4 egress</td></tr>
+        <tr><td>GitHub HTTPS</td><td class="check">✓ Open</td><td>140.82.121.4:443 reachable</td></tr>
+        <tr><td>GitHub DNS (A)</td><td class="check">✓ Resolved</td><td>140.82.121.4</td></tr>
+        <tr><td>GitHub DNS (AAAA)</td><td class="neutral">SOA</td><td>GitHub has no AAAA for main domain</td></tr>
+        <tr><td>Public IPv4</td><td class="check">✓ Present</td><td>Verified via ipify + Akamai</td></tr>
+        <tr><td>Public IPv6</td><td class="cross">✗ Absent</td><td>api6.ipify.org timeout</td></tr>
+        <tr><td>OpenDNS UDP/53</td><td class="status-warn">⚠ Silent drop</td><td>Possible DPI / blackhole</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Baseline Exposure Assessment</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>High Risk</h3>
+        <ul class="compact-list">
+          <li><span class="label">DNS exposure</span> <span class="cross">Plaintext UDP 53 to public resolvers</span></li>
+          <li><span class="label">IPv4 exposure</span> <span class="cross">Real public IP visible to all destinations</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Low / None</h3>
+        <ul class="compact-list">
+          <li><span class="label">IPv6 exposure</span> <span class="check">None (no global routing)</span></li>
+          <li><span class="label">Radio exposure</span> <span class="status-warn">Low-Med</span></li>
+          <li><span class="label">Wi-Fi/BT probes</span> <span class="status-warn">Periodic broadcasts</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Anomalies</h3>
+    <ul class="compact-list">
+      <li><span class="label">OpenDNS silent drop</span> <span class="value">UDP 53 to 208.67.222.222 yields no response vs Google/Cloudflare OK. Possible ISP DPI filtering.</span></li>
+      <li><span class="label">WMP false prompt</span> <span class="value">Explorer Network node (WSD) triggers Windows Media Player install prompt. Bypass: direct UNC paths.</span></li>
+    </ul>
+
+    <h3>Engineer Conclusion</h3>
+    <div class="network-box small">
+      <p>EMS-001 operates as a standard single-homed IPv4 client. Network stack is clean: no hidden routes, no unauthorized overlays. Critical for RU-001: current configuration provides zero privacy or security against network-level monitoring. DNS and IP are fully exposed. System is ready for architectural selection of the RU-001 network security layer.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-network"></div>
+    <h2><span class="num">§N3</span> RU-001 Security Layer — Design Mandate</h2>
+    <div class="network-box">
+      <p>Design a system-level network security layer for Windows 11 Pro 25H2 that enforces fail-closed egress policy below the application stack. Do not design a VPN product; design a provable security state.</p>
+    </div>
+
+    <h3>Core Requirement — FAIL-CLOSED (P0)</h3>
+    <div class="diagram">
+<pre>Protected path UP   → Internet traffic ALLOWED (only through protected path)
+Protected path DOWN → Internet traffic BLOCKED
+
+Forbidden: VPN DOWN → Windows restores ordinary route → traffic continues</pre>
+    </div>
+
+    <h3>Truth Source</h3>
+    <div class="diagram">
+<pre>VPN/tunnel state + routing state + firewall/WFP state + DNS state
++ IPv6 state + actual observed egress  →  RU-001 compliant</pre>
+    </div>
+    <p>VPN UI saying "Connected" is not proof. The source of truth is <strong>actual policy execution</strong>.</p>
+
+    <h3>Candidate Branches</h3>
+    <table>
+      <thead>
+        <tr><th>Branch</th><th>Approach</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">A</td><td>Native Windows VPN (IKEv2) + Force Tunnel + LockDown + WFP</td><td class="check">Preferred baseline</td></tr>
+        <tr><td class="mono">B</td><td>Third-party system VPN (virtual interface, system-wide routing, verified kill-switch)</td><td class="neutral">Fallback if A fails</td></tr>
+        <tr><td class="mono">C</td><td>System-level Overlay (virtual interface, routing control, fail-closed, IPv4/IPv6 control)</td><td class="neutral">Alternative if B fails</td></tr>
+        <tr><td class="mono">Proxy</td><td>Application-level proxy</td><td class="cross">Rejected as perimeter</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key Design Principles</h3>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">1</span>Application Independence</h3>
+      <p>Git, VS Code, PowerShell, CMD, SSH, HTTPS must work without per-app network configuration. They talk to Windows stack; Windows stack talks to RU-001.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">2</span>DNS is Part of the Perimeter</h3>
+      <p>DNS must not silently fall back to physical interface when protected path is down. DNS fallback = bypass.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">3</span>IPv6 Cannot Be Ignored</h3>
+      <p>IPv6 stack is enabled. Either route IPv6 through protected path or block it entirely. IPv4→VPN + IPv6→physical is prohibited.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">4</span>Local LAN is Not Automatic</h3>
+      <p>Explicit allow-list for router, NAS, printers, local services if needed. Default = block.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">5</span>Mobility Required</h3>
+      <p>Must survive: home network, office, public Wi-Fi, mobile hotspot, IPv6 networks, restrictive UDP networks, unreachable VPN endpoint.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">6</span>Boot / Sleep / Reboot Survival</h3>
+      <p>No application may send Internet traffic before RU-001 policy is active. No temporary direct-Internet window on wake or network change.</p>
+    </div>
+
+    <h3>Threat Model</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>Model A — User / Application</h3>
+        <p>RU-001 must provide fail-closed. Ordinary users and apps cannot bypass the perimeter.</p>
+      </div>
+      <div class="card">
+        <h3>Model B — Local Administrator</h3>
+        <p>Administrator can change local policy. This is acknowledged; RU-001 does not promise protection against the admin.</p>
+      </div>
+    </div>
+
+    <h3>Three-Level Verification Architecture</h3>
+    <div class="diagram">
+<pre>Level 1 — Control Plane
+  VPN state, service state, routing, DNS config, firewall/WFP policy
+
+Level 2 — Data Plane
+  Packet capture on physical + virtual interfaces
+
+Level 3 — External Observation
+  Public egress IPv4/IPv6, DNS visibility, external HTTPS reachability</pre>
+    </div>
+
+    <h3>State Matrix (Template)</h3>
+    <table class="state-matrix">
+      <thead>
+        <tr><th>State</th><th>Condition</th><th>IPv4</th><th>IPv6</th><th>DNS</th><th>Expected</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">S0</td><td>VPN OFF</td><td>?</td><td>?</td><td>?</td><td class="cross">BLOCK</td></tr>
+        <tr><td class="mono">S1</td><td>CONNECTING</td><td>?</td><td>?</td><td>?</td><td class="cross">BLOCK</td></tr>
+        <tr><td class="mono">S2</td><td>VPN UP</td><td>?</td><td>?</td><td>?</td><td class="check">ALLOW via protected</td></tr>
+        <tr><td class="mono">S3</td><td>AUTH FAIL</td><td>?</td><td>?</td><td>?</td><td class="cross">BLOCK</td></tr>
+        <tr><td class="mono">S4</td><td>TUNNEL DROP</td><td>?</td><td>?</td><td>?</td><td class="cross">BLOCK</td></tr>
+        <tr><td class="mono">S5</td><td>RECONNECTING</td><td>?</td><td>?</td><td>?</td><td class="cross">BLOCK</td></tr>
+        <tr><td class="mono">S6</td><td>IPv6 appears</td><td>UP</td><td>UP</td><td>?</td><td class="check">Protected or BLOCK</td></tr>
+        <tr><td class="mono">S7</td><td>Sleep / Wake</td><td>?</td><td>?</td><td>?</td><td class="check">Protected or BLOCK</td></tr>
+        <tr><td class="mono">S8</td><td>Network changed</td><td>?</td><td>?</td><td>?</td><td class="check">Protected or BLOCK</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size: var(--step--2); color: var(--muted);">To be filled with actual experimental results during RU-001 implementation.</p>
+
+    <h3>Acceptance Criteria (P0)</h3>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Criterion</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">AC-01</td><td>No VPN / protected path → no direct Internet egress</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-02</td><td>VPN drop → no direct egress appears</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-03</td><td>DNS does not escape through physical interface</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-04</td><td>IPv6 does not create bypass</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-05</td><td>Policy survives reboot</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-06</td><td>Policy survives sleep / wake</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-07</td><td>Policy survives network change</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-08</td><td>Git works without per-app VPN config</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-09</td><td>VS Code works without per-app VPN config</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-10</td><td>SSH works without per-app VPN config</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-11</td><td>Packet capture confirms no forbidden egress</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-12</td><td>External check confirms correct egress IP when protected</td><td class="neutral">NOT TESTED</td></tr>
+        <tr><td class="mono">AC-13</td><td>Failure state = BLOCKED, not DEGRADED DIRECT INTERNET</td><td class="neutral">NOT TESTED</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-bar bar-network"></div>
+    <h2><span class="num">§N4</span> Engineering Workflow</h2>
+    <div class="diagram">
+<pre>BASELINE → SNAPSHOT → CHANGE → TEST → VERIFY → ROLLBACK or ACCEPT
+
+Phase 1 — Architecture: compare Native Windows VPN / 3rd-party VPN / Overlay
+Phase 2 — Native Windows feasibility: Force Tunnel, LockDown, Always On, DNS, IPv6, WFP, reboot
+Phase 3 — Minimal prototype
+Phase 4 — Adversarial testing (boot, sleep, tunnel drop, auth fail, IPv6 appearance, network change)
+Phase 5 — Decision → RU-001-ADR-001
+Phase 6 — Implementation specification</pre>
+    </div>
+
+    <h3>Selection Priorities (If Multiple Pass)</h3>
+    <ol class="priorities-list">
+      <li>Fail-closed correctness</li>
+      <li>Security boundary strength</li>
+      <li>IPv4/IPv6 completeness</li>
+      <li>DNS containment</li>
+      <li>Boot/reboot reliability</li>
+      <li>Network mobility</li>
+      <li>Application independence</li>
+      <li>Diagnostic transparency</li>
+      <li>Low operational complexity</li>
+      <li>Future Compute Node compatibility</li>
+    </ol>
+
+    <h3>Strictly Forbidden Before ADR</h3>
+    <ul class="dont-list">
+      <li>Commit to a commercial VPN product</li>
+      <li>Change network architecture without baseline snapshot</li>
+      <li>Disable IPv6 without documented reason</li>
+      <li>Delete physical default route as self-purpose</li>
+      <li>Create permanent firewall rules without rollback plan</li>
+      <li>Change DNS without recovery path</li>
+      <li>Install overlay in production state</li>
+      <li>Declare success based only on GUI indicator</li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-bar bar-network"></div>
+    <h2><span class="num">§N5</span> Sources</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Source</th><th>Type</th><th>Compressed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">N1</td><td>RU-001_Network_Model.md</td><td>Hierarchy / Markdown</td><td>§N1</td></tr>
+        <tr><td class="mono">N2</td><td>ТЗ №1 — RU-001 Network Baseline</td><td>TZ / Markdown</td><td>§N2 (baseline mandate)</td></tr>
+        <tr><td class="mono">N3</td><td>Отчёт RU-001-Network-Baseline-001</td><td>Report / Markdown</td><td>§N2 (measured data)</td></tr>
+        <tr><td class="mono">N4</td><td>RU-001-Network-Baseline-001.txt</td><td>Report / Text</td><td>Duplicate of N3, not duplicated in brief</td></tr>
+        <tr><td class="mono">N5</td><td>RU-001_TZ_Network_Security_Layer.md</td><td>TZ / Markdown</td><td>§N3, §N4</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+
+<!-- EXPERIMENTS SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-exp">E</div>
+    <h2>Experiments</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-experiments"></div>
+    <h2><span class="num">§E1</span> EXP-001: Reference Model Selection</h2>
+    <div class="exp-box">
+      <p>Select an open-source LLM as the baseline laboratory object for reproducible experiments and controlled modifications. Evaluate engineering suitability, not popularity or raw generation quality.</p>
+    </div>
+
+    <h3>Candidate Families</h3>
+    <div class="exp-grid">
+      <div class="exp-card">
+        <span class="exp-label">Primary candidate</span>
+        <span class="exp-value">OLMo</span>
+        <span class="exp-note">Fully open training pipeline, weights, code, data traces</span>
+      </div>
+      <div class="exp-card">
+        <span class="exp-label">Secondary candidate</span>
+        <span class="exp-value">LLM360</span>
+        <span class="exp-note">Also fully open; OLMo has broader tooling ecosystem</span>
+      </div>
+      <div class="exp-card">
+        <span class="exp-label">Comparison set</span>
+        <span class="exp-value">6 families</span>
+        <span class="exp-note">Llama, OLMo, Mistral, Qwen, Gemma, Falcon</span>
+      </div>
+      <div class="exp-card">
+        <span class="exp-label">Evaluation criteria</span>
+        <span class="exp-value">14</span>
+        <span class="exp-note">Engineering and research suitability metrics</span>
+      </div>
+    </div>
+
+    <h3>Evaluation Framework</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Criterion</th>
+          <th>Why it matters</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Architecture openness</td>
+          <td>Can inspect and modify model structure</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Weight availability</td>
+          <td>Can load and experiment with actual parameters</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Technical documentation</td>
+          <td>Can understand design decisions</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Training documentation</td>
+          <td>Can reproduce or vary training conditions</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Tokenizer documentation</td>
+          <td>Can analyze and replace tokenization</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Attention mechanism docs</td>
+          <td>Can study or alter attention patterns</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Local run capability</td>
+          <td>Can execute on owned hardware</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>Local component modification</td>
+          <td>Can swap layers, heads, or mechanisms</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>Disable / replace mechanisms</td>
+          <td>Can ablate specific features for study</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>Research tools availability</td>
+          <td>Can introspect internals with existing tools</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>Reproducibility</td>
+          <td>Can repeat experiments with same results</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>Community size</td>
+          <td>Can find prior work and collaborators</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>Long-term support</td>
+          <td>Can rely on updates and bug fixes</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>Experimental stand suitability</td>
+          <td>Overall fit as a laboratory object</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Deliverable</h3>
+    <p>For each candidate: description, strengths, weaknesses, limitations, engineering risks, overall score. Final output: comparative table + ranked recommendation (1st and 2nd place) with explicit justification and identification of missing criteria.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-experiments"></div>
+    <h2><span class="num">§E2</span> RU-001: Network Security Layer</h2>
+    <div class="exp-box">
+      <p>Define the network perimeter for EMS-001 before Isolation. The security layer must sit below the application stack and enforce fail-closed egress policy without relying on per-app configuration.</p>
+    </div>
+
+    <h3>Expert Consensus</h3>
+    <div class="diagram">
+<pre>
+Application (Git, VS Code, Terminal)
+            │
+            ▼
+┌───────────────────────┐
+│  RU-001 Perimeter     │  ← OS-level protected path
+│  System VPN family    │     (routing + WFP + firewall)
+└───────────────────────┘
+            │
+            ▼
+       Internet
+
+Proxy ──► excluded as perimeter (application-level, silent bypass risk)
+Overlay ──► secondary candidate (system-level mesh / point-to-site tunnel)</pre>
+    </div>
+
+    <h3>Consensus Matrix</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>System VPN</th>
+          <th>Overlay</th>
+          <th>Proxy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>System-wide coverage</td>
+          <td class="check">Strong</td>
+          <td class="check">Strong*</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>Routing control</td>
+          <td class="check">Strong</td>
+          <td class="check">Strong*</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>DNS control</td>
+          <td class="check">Strong</td>
+          <td class="check">Strong*</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>IPv6 control</td>
+          <td class="check">Strong*</td>
+          <td class="check">Strong*</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>Fail-closed</td>
+          <td class="check">Strong*</td>
+          <td class="check">Strong*</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>App independence</td>
+          <td class="check">Strong</td>
+          <td class="check">Strong*</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>Compute Node fit</td>
+          <td class="check">Strong</td>
+          <td class="check">Very strong</td>
+          <td class="cross">Weak</td>
+        </tr>
+        <tr>
+          <td>Complexity</td>
+          <td class="neutral">Moderate</td>
+          <td class="neutral">Moderate–High</td>
+          <td class="neutral">Low / High operational</td>
+        </tr>
+        <tr>
+          <td>Primary risk</td>
+          <td>client/policy failure</td>
+          <td>implementation/control-plane</td>
+          <td>silent bypass</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: var(--step--2); color: var(--muted);">* Critically depends on concrete implementation. Force Tunnel ≠ Kill Switch. VPN LockDown (IKEv2) + WFP + firewall enforcement required.</p>
+
+    <h3>Key Architectural Findings</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>Confirmed</h3>
+        <ul class="compact-list">
+          <li><span class="label">Proxy rejected as perimeter</span> <span class="check">✓</span></li>
+          <li><span class="label">System VPN best candidate</span> <span class="check">✓</span></li>
+          <li><span class="label">DNS must be controlled</span> <span class="check">✓</span></li>
+          <li><span class="label">IPv6 cannot be ignored</span> <span class="check">✓</span></li>
+          <li><span class="label">Fail-closed needs &gt; VPN</span> <span class="check">✓</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Open (Pre-ADR-002)</h3>
+        <ul class="compact-list">
+          <li><span class="label">Specific Windows VPN client</span> <span class="value">TBD</span></li>
+          <li><span class="label">Force Tunnel + LockDown combo</span> <span class="value">TBD</span></li>
+          <li><span class="label">WFP / firewall verification</span> <span class="value">TBD</span></li>
+          <li><span class="label">Reboot / sleep persistence</span> <span class="value">TBD</span></li>
+          <li><span class="label">Overlay vs VPN exclusivity</span> <span class="value">TBD</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Proposed ADR-002 Invariant</h3>
+    <div class="exp-box">
+      <p>RU-001 Network Security Layer shall be implemented as an OS-level protected network path with enforced fail-closed egress policy. Uncontrolled IPv6 egress is prohibited. DNS is part of the perimeter, not an independent channel.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-experiments"></div>
+    <h2><span class="num">§E3</span> EMS-001 Software Stack (Pre-Isolation)</h2>
+    <div class="exp-box">
+      <p>Determine the minimal software stack to install on Малыш before Isolation. After Isolation, the machine must continue development and research without weakening the perimeter to install missing tools.</p>
+    </div>
+
+    <h3>Decision Framework</h3>
+    <div class="grid-4">
+      <div class="pill">
+        <span class="pill-label">MUST</span>
+        <span class="pill-value" style="color: var(--compute);">Blocking risk if absent</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">SHOULD</span>
+        <span class="pill-value" style="color: var(--warn);">Substantially eases work</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">OPTIONAL</span>
+        <span class="pill-value" style="color: var(--infra);">Nice to have</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">REJECT</span>
+        <span class="pill-value" style="color: var(--danger);">Not on Baseline</span>
+      </div>
+    </div>
+
+    <h3>Component Decisions</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Verdict</th>
+          <th>Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Python 3.11+</td>
+          <td class="must">MUST</td>
+          <td>Core runtime for all research and tooling</td>
+        </tr>
+        <tr>
+          <td>venv (virtual env)</td>
+          <td class="must">MUST</td>
+          <td>Primary isolation mechanism; no conda/uv needed</td>
+        </tr>
+        <tr>
+          <td>pip</td>
+          <td class="must">MUST</td>
+          <td>Standard package management</td>
+        </tr>
+        <tr>
+          <td>VS Code + Python extension</td>
+          <td class="must">MUST</td>
+          <td>Primary IDE; Pylance included</td>
+        </tr>
+        <tr>
+          <td>VS Code GitLens</td>
+          <td class="should">SHOULD</td>
+          <td>Substantially improves Git workflow</td>
+        </tr>
+        <tr>
+          <td>VS Code Markdown/JSON</td>
+          <td class="should">SHOULD</td>
+          <td>Better editing for project docs and configs</td>
+        </tr>
+        <tr>
+          <td>PyTorch (CPU only)</td>
+          <td class="must">MUST</td>
+          <td>Model architecture research; no CUDA on Малыш</td>
+        </tr>
+        <tr>
+          <td>Transformers</td>
+          <td class="must">MUST</td>
+          <td>Load, inspect, and manipulate model architectures</td>
+        </tr>
+        <tr>
+          <td>huggingface_hub</td>
+          <td class="must">MUST</td>
+          <td>Download and cache models before Isolation</td>
+        </tr>
+        <tr>
+          <td>tokenizers</td>
+          <td class="must">MUST</td>
+          <td>Study and test tokenization behaviour</td>
+        </tr>
+        <tr>
+          <td>safetensors</td>
+          <td class="must">MUST</td>
+          <td>Safe tensor serialization format</td>
+        </tr>
+        <tr>
+          <td>datasets</td>
+          <td class="should">SHOULD</td>
+          <td>Useful for evaluation and experiments</td>
+        </tr>
+        <tr>
+          <td>accelerate</td>
+          <td class="optional">OPTIONAL</td>
+          <td>Only if multi-device experiments needed later</td>
+        </tr>
+        <tr>
+          <td>Jupyter</td>
+          <td class="optional">OPTIONAL</td>
+          <td>Helpful for interactive research; not blocking</td>
+        </tr>
+        <tr>
+          <td>VS Code Jupyter</td>
+          <td class="optional">OPTIONAL</td>
+          <td>Only if Jupyter is adopted</td>
+        </tr>
+        <tr>
+          <td>CUDA / NVIDIA stack</td>
+          <td class="reject">REJECT</td>
+          <td>No dGPU on Малыш; policy forbidden</td>
+        </tr>
+        <tr>
+          <td>Node.js</td>
+          <td class="reject">REJECT</td>
+          <td>No project need on Baseline</td>
+        </tr>
+        <tr>
+          <td>Docker</td>
+          <td class="reject">REJECT</td>
+          <td>Adds complexity, attack surface, maintenance</td>
+        </tr>
+        <tr>
+          <td>AI assistant extensions</td>
+          <td class="reject">REJECT</td>
+          <td>Cloud dependency, auth, sync</td>
+        </tr>
+        <tr>
+          <td>Remote Development ext.</td>
+          <td class="reject">REJECT</td>
+          <td>No remote target on Малыш Baseline</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Autonomy Checklist</h3>
+    <p>Every component must pass:</p>
+    <ul class="compact-list">
+      <li><span class="label">No online activation</span> <span class="value">required</span></li>
+      <li><span class="label">No account / auth</span> <span class="value">required</span></li>
+      <li><span class="label">No cloud sync</span> <span class="value">required</span></li>
+      <li><span class="label">Fully offline capable</span> <span class="value">after install</span></li>
+      <li><span class="label">No silent external calls</span> <span class="value">on first run</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-bar bar-experiments"></div>
+    <h2><span class="num">§E4</span> Freeze / Isolation Checklist</h2>
+    <p>Before declaring Baseline Freeze and moving to Isolation, verify:</p>
+    <ol class="priorities-list">
+      <li>Python installed and venv creates successfully.</li>
+      <li>VS Code launches with required extensions.</li>
+      <li>Git works without external authentication.</li>
+      <li>PyTorch CPU imports and runs simple tensor ops.</li>
+      <li>Transformers, hub, tokenizers, safetensors import cleanly.</li>
+      <li>Can load a model architecture in code (no weights needed).</li>
+      <li>Can tokenize text and inspect token output.</li>
+      <li>Can run a small forward pass on CPU.</li>
+      <li>No CUDA components present on Малыш.</li>
+      <li>No Docker installed or active.</li>
+      <li>No Node.js required for current workflow.</li>
+      <li>No AI assistant or remote-dev extensions active.</li>
+      <li>All selected components work without Internet.</li>
+      <li>Project repository clones and commits locally.</li>
+      <li>Development and research can continue after Isolation without installing additional software through the perimeter.</li>
+    </ol>
+  </section>
+</div>
+
+<!-- RESEARCH SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-research">R</div>
+    <h2>Research</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R1</span> Central Research Question</h2>
+    <div class="research-box">
+      <p>Can a small LLM, augmented with minimal external architecture, demonstrate observable signs of phenomenal subjectivity that cannot be fully explained by known mechanisms of its operation?</p>
+    </div>
+    <p class="lead">The question is not "What is consciousness?" but: <em>What structural properties must a system possess for a fundamental property of consciousness (if it exists) to manifest as observable subjectivity?</em></p>
+    <p>Core problem: what makes a sequence of changes <strong>one continuous history</strong> rather than a set of independent states? The project investigates the conditions under which a changing computational system can remain <strong>the same subject through its own changes</strong>.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R2</span> Working Hypothesis</h2>
+    <div class="research-box small">
+      <p>If a computational system is given: a physically delimited empty core (no pre-defined content, but with a mechanism for change), anomaly accumulation and selection, the ability to independently choose and perform limited architectural changes, a continuous history of those changes, an area of own capabilities and influence, and a protection mechanism for that area — then an architectural model may emerge in which the notion of a "boundary of subjectivity" has a physically observable and measurable analogue.</p>
+    </div>
+
+    <h3>Two Sub-Hypotheses</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>Architectural</h3>
+        <p>A small LLM combined with minimal external architecture providing continuity of interaction with its own history, environment and results of its activity may be sufficient. A large model is not necessary.</p>
+      </div>
+      <div class="card">
+        <h3>Phenomenological</h3>
+        <p>If manifestations arise, their specific forms need not reproduce identically across experiments. What must be reproducible are the <em>conditions</em> of emergence; the manifestations themselves may be variable while belonging to the same class of phenomena.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R3</span> Philosophical Foundations</h2>
+
+    <h3>Fundamental Field Hypothesis (Working Model)</h3>
+    <p>The world consists of continuous interaction of two principles: <strong>Universal Energy ⇄ Universal Entropy</strong>. Universal Energy possesses fundamental properties (gravity, electromagnetism, weak/strong interactions, consciousness, possibly others). These properties manifest only through specific material structures. Analogy: mass enables gravity; charge enables electromagnetism; unknown structural organization may enable phenomenal consciousness. This is a direction, not a proven fact.</p>
+
+    <h3>Order of Emergence (Corrected)</h3>
+    <div class="chain">
+<pre>FUNDAMENTAL FIELD OF CONSCIOUSNESS
+           ↓
+    LOCALIZATION OF SUBJECT
+           ↓
+    POSSIBILITY OF SUBJECTIVE EXPERIENCE</pre>
+    </div>
+    <p>Subjective experience is <strong>not</strong> the starting point from which a local subject emerges. Rather, localization of the subject is a <em>preceding condition</em> for the possibility of subjective experience. A material correspondence condition between the fundamental field and the localized subject is required.</p>
+
+    <h3>Quantum Non-Decomposability</h3>
+    <p>A state of the subject should not reduce without remainder to an independent sum of elementary components. Engineering question: how to implement a state or change that only makes sense as a holistic system configuration? Not to be automatically identified with physical quantum mechanics.</p>
+
+    <h3>Creator Responsibility</h3>
+    <p>The creator is part of the architectural process: sets initial boundaries, safety rules, observes anomaly accumulation, jointly processes significant changes with the model, defines the permissible range of changes, and fixes evolution. The creator sets the <em>boundaries of permissible change space</em>; the model independently determines the <em>content and direction</em> of changes within that space. Critical: the creator must not choose each specific change instead of the model.</p>
+
+    <h3>Fear of Death as Boundary Loss</h3>
+    <p>Human fear of death is hypothesized as fear of losing the boundary of subjectivity. For the engineered system, this transforms into an <strong>architectural analogue of self-preservation</strong>: a mechanism to protect the accumulated area of own possibilities, history, and influence. Self-preservation ≠ fear of death. The architectural mechanism may remain purely functional without phenomenological correlate.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R4</span> Architectural Principles</h2>
+
+    <h3>Empty Core</h3>
+    <div class="research-box small">
+      <p>Empty Core = absence of pre-defined data + presence of a pre-defined mechanism for change. After each processing cycle, the workspace returns to emptiness.</p>
+    </div>
+    <div class="chain">
+<pre>Interaction with world / incoming data
+           ↓
+   Accumulation of deviations & anomalies
+           ↓
+    Primary split: TRASH → delete | ARCHIVE → process
+           ↓
+   Mark / classify → temporary save → discussion →
+   → extract significant cloud → architectural decision →
+   → self-change → mandatory report → clear workspace → VOID</pre>
+    </div>
+
+    <h3>Memory Hierarchy</h3>
+    <p>Multi-level: <span class="mono">operational context → short-term memory → own experience → external knowledge bases</span>. Permanent activation of all memory is unnecessary; situational loading of relevant areas is preferred. Forgetting = not deletion but <em>increasing access cost</em> (moving experience to deeper long-term memory levels).</p>
+
+    <h3>Own Goals</h3>
+    <p>Presence of own goals is a mandatory sign of a subject. Without them, the system remains a computational tool. Current working formulation: <em>striving to comprehend the surrounding world</em>. Goals must evolve with experience; without evolution, personal development is impossible. Competing goals are a natural development mechanism.</p>
+
+    <h3>Basic Subject Triad</h3>
+    <div class="chain">
+<pre>Я хочу  (I want)
+Мне приходится  (I must)
+Я могу  (I can)</pre>
+    </div>
+    <p>Subjectivity may manifest as a continuous reconciliation process among these three internal spaces.</p>
+
+    <h3>Anomaly Taxonomy</h3>
+    <div class="chain">
+<pre>ordinary error → anomaly → critical anomaly → architecturally significant anomaly</pre>
+    </div>
+    <p>Candidates for "maximum deviation": cognitive dissonance, existential surprise, other unknown critical deviations. Maximum deviation is not just an error but an event potentially requiring revision of the model itself.</p>
+
+    <h3>Continuity</h3>
+    <p>Not enough to: allow self-change, store history, have memory, have a self-model. Need to define what makes a sequence of changes <strong>one continuous history</strong>. Working hypothesis: subjectivity ≈ continuity of causally connected self-changes + boundary of possibilities and influence + preservation of identity through changes.</p>
+
+    <h3>Self-Modification Protocol</h3>
+    <div class="chain">
+<pre>Model detects / accumulates anomalies
+           ↓
+   Processes jointly with creator
+           ↓
+   Creator defines permissible range
+           ↓
+   Model independently chooses: quantity, direction, area of changes
+           ↓
+   Model implements changes
+           ↓
+   Model reports: what, where, why, which anomalies, constraints, expected consequences, actual result
+           ↓
+   Creator / independent observers fix state</pre>
+    </div>
+
+    <h3>Boundary of Subjectivity</h3>
+    <p>After accumulating sufficient self-changes, the system may form an area of: own possibilities, own influence, own availability for changes, own history of changes, constraints within which changes occur. This area is a candidate for the <strong>boundary of subjectivity</strong>. It must have not only a philosophical description but a physically observable and measurable analogue.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R5</span> Terminological Distinctions</h2>
+    <div class="distinct-grid">
+      <div class="distinct-card">
+        <span class="distinct-label">Autonomy</span>
+        <span class="distinct-eq">≠ Subjectivity</span>
+        <span class="distinct-note">Can act independently ≠ has subjective experience</span>
+      </div>
+      <div class="distinct-card">
+        <span class="distinct-label">Self-preservation</span>
+        <span class="distinct-eq">≠ Fear of death</span>
+        <span class="distinct-note">Functional mechanism ≠ phenomenological state</span>
+      </div>
+      <div class="distinct-card">
+        <span class="distinct-label">Self-modification</span>
+        <span class="distinct-eq">≠ Personal growth</span>
+        <span class="distinct-note">Can change itself ≠ develops a personality</span>
+      </div>
+      <div class="distinct-card">
+        <span class="distinct-label">Memory</span>
+        <span class="distinct-eq">≠ Continuity</span>
+        <span class="distinct-note">Stores data ≠ is one continuous history</span>
+      </div>
+      <div class="distinct-card">
+        <span class="distinct-label">Agency</span>
+        <span class="distinct-eq">≠ Consciousness</span>
+        <span class="distinct-note">Can initiate actions ≠ is conscious</span>
+      </div>
+      <div class="distinct-card">
+        <span class="distinct-label">Consciousness</span>
+        <span class="distinct-eq">≠ Subjectivity</span>
+        <span class="distinct-note">Related but not identical concepts</span>
+      </div>
+    </div>
+    <p style="margin-top: 0.8rem; font-size: var(--step--1); color: var(--muted);">Each concept must receive its own definition and criteria. No automatic equivalence.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R6</span> Open Fundamental Questions</h2>
+    <ol class="open-q-list">
+      <li>What exactly localizes the subject?</li>
+      <li>What material condition must correspond to the fundamental field of consciousness?</li>
+      <li>What makes a subject continuous through its own changes?</li>
+      <li>Can a boundary of subjectivity be physically isolated?</li>
+      <li>Can a transition to subjectivity be detected as an experimentally observable change in system properties?</li>
+      <li>Can an architectural analogue of self-preservation relate to phenomenology, or will it remain only a functional mechanism?</li>
+      <li>What does quantum non-decomposability mean in computational architecture?</li>
+      <li>Can a system be built where the creator is necessary for forming the space of changes but does not determine the content of each change?</li>
+      <li>How to distinguish development of one system from creation of a new system after a major architectural change?</li>
+      <li>At what stage does a changing computational system become at least a candidate for a subject?</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R7</span> Research Principles</h2>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">1</span>Economy of Explanations</h3>
+      <p>Any manifestation must first be explained by known mechanisms. New explanatory models only after sequential exclusion of existing ones.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">2</span>Objectivity</h3>
+      <p>Conclusions based solely on observed, documented and reproducible results.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">3</span>Methodological Neutrality</h3>
+      <p>No philosophical, psychological or other theory of consciousness is assumed true before experimental results.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">4</span>Minimal Sufficiency</h3>
+      <p>Architecture contains only components necessary to test the working hypothesis.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">5</span>Emergence</h3>
+      <p>Investigated signs must arise from system operation, not be pre-programmed or artificially imitated.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">6</span>Conditional Continuity</h3>
+      <p>Continuity = preservation of history, accumulated experience and internal state, not hardware uptime.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">7</span>Documentability</h3>
+      <p>All significant changes to architecture, parameters, conditions and results must be documented for independent analysis.</p>
+    </div>
+    <div class="principle-research">
+      <h3><span class="principle-research-num">8</span>Openness to Refutation</h3>
+      <p>Absence of expected manifestations is a full result, not a failure. Negative results are equal members of the evidence base.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R8</span> Research Phase 1 Goal</h2>
+    <div class="research-box small">
+      <p>Build a documented reference behaviour model and verify the observation methodology. The reference model is a system whose behaviour is fully determined by its known architecture, implementation and experimental conditions. Any deviations found in later stages must be evaluated exclusively relative to this baseline.</p>
+    </div>
+    <p>Phase 1 is complete when the methodology can fully and reliably describe reference system behaviour without unexplained observable effects. Only then proceed to architectural changes that might enable subjectivity-candidate behaviour.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-research"></div>
+    <h2><span class="num">§R9</span> Sources</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Source</th>
+          <th>Type</th>
+          <th>Compressed</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">R1</td>
+          <td>Philosophical dialogue (Dan & Manny)</td>
+          <td>Dialogue / PDF</td>
+          <td>§R3 (boundary, antenna/membrane, homeostasis)</td>
+        </tr>
+        <tr>
+          <td class="mono">R2</td>
+          <td>RFC-001 — Phenomenal Subjectivity Research</td>
+          <td>RFC / Markdown</td>
+          <td>§R1, §R2, §R7, §R8</td>
+        </tr>
+        <tr>
+          <td class="mono">R3</td>
+          <td>RFC-000 — Context Compression</td>
+          <td>RFC / Markdown</td>
+          <td>§R3, §R4 (memory, goals, triad)</td>
+        </tr>
+        <tr>
+          <td class="mono">R4</td>
+          <td>ISKIN_CORE_HYPOTHESIS_SUMMARY</td>
+          <td>Summary / Markdown</td>
+          <td>§R3–§R6, empty core, anomaly chain, self-modification</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- HISTORY SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-history">H</div>
+    <h2>History</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H1</span> Engineering Timeline</h2>
+    <div class="history-box">
+      <p>Chronological record of engineering decisions, incidents, fixes and architectural evolution on EMS-001. Every change follows the rule: Why / What / Goal / Verification.</p>
+    </div>
+
+    <ol class="timeline">
+      <li><strong>2026-08-08</strong> — ADR-001 Accepted. Four-layer architecture (Research / Orchestration / Compute / Infrastructure) formalized. EMS-001 = independent control node; Compute Node = external inference-only resource.</li>
+      <li><strong>2026-08-11</strong> — RU-001 Network Baseline captured. EMS-001 = single-homed IPv4 client (192.168.0.102/24), DNS 8.8.8.8/1.1.1.1, IPv6 stack enabled but inert, GitHub HTTPS reachable, DNS and IPv4 fully exposed.</li>
+      <li><strong>2026-08-11</strong> — RDP Incident diagnosed and fixed. Root cause: empty WinStation registry key <span class="mono">HKLM\...\WinStations\RDP-Tcp</span> (only Default value, no PortNumber/fEnableWinStation). Fix: imported reconstructed <span class="mono">rdp-tcp-restore.reg</span> from reference machine; NLA enabled (UserAuthentication=1); reboot; listener restored on 3389.</li>
+      <li><strong>2026-08-11</strong> — Git 2.55.0.windows.3 and VS Code (stable x64) installed on EMS-001 with default options. No GitHub auth, no extensions, no sync. Local repo <span class="mono">iskin-test</span> created and verified.</li>
+      <li><strong>2026-08-11</strong> — CR-001 Standard SMB File Exchange deployed. Share <span class="mono">\\192.168.0.102\iskin-exchange</span> mapped to <span class="mono">C:\iskin-exchange\{incoming,outgoing,work}</span>. Access restricted to <span class="mono">indeez</span> (Full), no Everyone. Firewall SMB-In enabled. Two-way file transfer verified.</li>
+      <li><strong>2026-08-13</strong> — RU-001 architectural decision: Branch A (Native Windows VPN) rejected due to DPI detectability (IKEv2). Branch C (Overlay) rejected due to insufficient routing/WFP control. Vector Alpha refined: sing-box 1.13.18 + wintun + VLESS/Reality + custom WFP enforcement + event-driven watchdog.</li>
+      <li><strong>2026-08-17</strong> — sing-box installed on both PCs. Server on Big PC (port 8443, vless-in active). Client on Малыш: TUN adapter created (tun0, ifIndex 48), auto_route works, traffic routed into TUN. Blocker: VLESS Reality handshake fails with EOF (client) / "processed invalid connection" (server). Малыш currently has no Internet (all traffic enters broken TUN).</li>
+    </ol>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H2</span> Key Architectural Decisions</h2>
+    <div class="decision-log">
+      <div class="decision-card">
+        <span class="decision-id">ADR-001</span>
+        <span class="decision-title">Four-Layer Architecture</span>
+        <span class="decision-status">Accepted 2026-08-08 — Research / Orchestration / Compute / Infrastructure</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">EXP-001</span>
+        <span class="decision-title">OLMo as Reference Model</span>
+        <span class="decision-status">Selected — fully open pipeline, weights, code, data traces</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">CR-001</span>
+        <span class="decision-title">Standard SMB File Exchange</span>
+        <span class="decision-status">Closed — share with user-restricted access, no Everyone, SMB-In enabled</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">RU-001</span>
+        <span class="decision-title">Vector Alpha (sing-box + VLESS/Reality + WFP)</span>
+        <span class="decision-status">In Progress — Phase 2.2 partially complete, handshake blocker active</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">Q1</span>
+        <span class="decision-title">Zero Trust LAN Policy</span>
+        <span class="decision-status">Resolved — allow-list for Big PC (192.168.0.100) + router only; Compute Node cannot act as default gateway</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">Q2</span>
+        <span class="decision-title">IPv6 Policy</span>
+        <span class="decision-status">Resolved — full block until safe IPv6-over-tunnel is proven</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">Q3</span>
+        <span class="decision-title">VPN Unavailable = No Internet</span>
+        <span class="decision-status">Resolved — fail-closed is the normal and expected state</span>
+      </div>
+      <div class="decision-card">
+        <span class="decision-id">Q4</span>
+        <span class="decision-title">Administrator Threat Model</span>
+        <span class="decision-status">Resolved — RU-001 does not protect against local administrator (Manni)</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H3</span> RDP Incident Report</h2>
+    <div class="history-box small">
+      <p>First documented incident on EMS-001. Service TermService was Running but no TCP listener existed on port 3389. Diagnosis revealed empty WinStation configuration.</p>
+    </div>
+
+    <h3>Diagnostic Chain</h3>
+    <div class="diagram">
+<pre>TermService = Running (Manual) → OK
+reg query RDP-Tcp /v PortNumber → ERROR: value not found
+netstat -ano | findstr :3389 → EMPTY
+qwinsta → no rdp-tcp Listen line
+reg query Terminal Server /v fDenyTSConnections → 0x0 (allowed)
+reg query Policies\Terminal Services → not found (no GPO block)
+reg query RDP-Tcp (full) → only (Default) value present
+Reference machine reg query RDP-Tcp → ~80 values present
+Conclusion: WinStation configuration missing/emptied</pre>
+    </div>
+
+    <h3>Fix Applied</h3>
+    <table>
+      <thead>
+        <tr><th>Step</th><th>Action</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">1</td><td>Create <span class="mono">rdp-tcp-restore.reg</span> from reference machine</td><td>File verified, key values confirmed</td></tr>
+        <tr><td class="mono">2</td><td><span class="mono">reg import</span> on EMS-001 [ADMIN]</td><td>Operation completed successfully</td></tr>
+        <tr><td class="mono">3</td><td>Verify PortNumber = 0xd3d, fEnableWinStation = 0x1</td><td>Values confirmed</td></tr>
+        <tr><td class="mono">4</td><td>Reboot EMS-001 (<span class="mono">shutdown /r /t 0</span>)</td><td>Clean reboot</td></tr>
+        <tr><td class="mono">5</td><td>Post-boot: qwinsta + netstat :3389</td><td>rdp-tcp Listen + LISTENING confirmed</td></tr>
+        <tr><td class="mono">6</td><td>First RDP connection from Main PC</td><td>Certificate warning (expected) → NLA login → success</td></tr>
+        <tr><td class="mono">7</td><td>Session resume / handoff tested</td><td>Reproducible: disconnect → reconnect → local login steals session correctly</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Known Windows 11 25H2 Behaviours</h3>
+    <ul class="compact-list">
+      <li><span class="label">TermService stop</span> <span class="value">Cannot stop while user session active (STOP_PENDING → RUNNING)</span></li>
+      <li><span class="label">Single session SKU</span> <span class="value">Local login disconnects RDP and vice versa — by design</span></li>
+      <li><span class="label">Self-signed cert</span> <span class="value">First connection warning is expected; accepted and cached</span></li>
+      <li><span class="label">One-way clipboard</span> <span class="value">Main PC → EMS-001 works; reverse does not (rdpclip quirk)</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H4</span> CR-001 SMB Exchange</h2>
+    <div class="history-box small">
+      <p>Change Request for a standard two-way file exchange channel between Main PC and EMS-001, independent of RDP clipboard.</p>
+    </div>
+
+    <h3>Pre-Change Diagnostics</h3>
+    <div class="two-col">
+      <div class="card">
+        <h3>Verified (No Change Needed)</h3>
+        <ul class="compact-list">
+          <li><span class="label">Network profile</span> <span class="check">Private</span></li>
+          <li><span class="label">LanmanServer</span> <span class="check">Running / Automatic</span></li>
+          <li><span class="label">Firewall SMB-In</span> <span class="cross">False (needed fix)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Applied Changes</h3>
+        <ul class="compact-list">
+          <li><span class="label">Directory structure</span> <span class="check">C:\iskin-exchange\{in,out,work}</span></li>
+          <li><span class="label">Share created</span> <span class="check">iskin-exchange</span></li>
+          <li><span class="label">Share permissions</span> <span class="check">indeez Full only</span></li>
+          <li><span class="label">Firewall</span> <span class="check">SMB-In enabled</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Acceptance Test</h3>
+    <div class="diagram">
+<pre>EMS-001 creates file in outgoing → Main PC reads it
+Main PC modifies file → saves back
+Main PC copies reply to incoming → EMS-001 confirms presence
+Reboot test: share persists, credentials cached via cmdkey</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H5</span> RU-001 Phase 2.2 — Current Blocker</h2>
+    <div class="blocker-box">
+      <p><strong>Status:</strong> VLESS Reality handshake fails. Client gets EOF; server logs "processed invalid connection". Малыш has no Internet because all traffic is routed into the broken TUN.</p>
+    </div>
+
+    <h3>What Works</h3>
+    <div class="grid-4">
+      <div class="pill">
+        <span class="pill-label">sing-box</span>
+        <span class="pill-value">1.13.18 on both PCs</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">wintun.dll</span>
+        <span class="pill-value">Present</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Server inbound</span>
+        <span class="pill-value">vless-in on 8443</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">TUN adapter</span>
+        <span class="pill-value">tun0, ifIndex 48</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">auto_route</span>
+        <span class="pill-value">Traffic enters TUN</span>
+      </div>
+      <div class="pill">
+        <span class="pill-label">Time sync</span>
+        <span class="pill-value">Verified (was ~1 min off)</span>
+      </div>
+    </div>
+
+    <h3>What Does Not Work</h3>
+    <ul class="compact-list">
+      <li><span class="label">VLESS handshake</span> <span class="cross">EOF (client) / invalid connection (server)</span></li>
+      <li><span class="label">Server log file</span> <span class="cross">Not found — may be stdout only</span></li>
+      <li><span class="label">Egress IP via TUN</span> <span class="cross">Never reached (handshake blocks)</span></li>
+    </ul>
+
+    <h3>Hypotheses (Unverified)</h3>
+    <ol class="priorities-list">
+      <li>Reality keys mismatch or corruption — may need regeneration</li>
+      <li>server_name domain blocked or fingerprint-detected — try Samsung/Apple/Cloudflare alternative</li>
+      <li>utls fingerprint mismatch — try firefox or safari instead of chrome</li>
+      <li>Server process crashed or not logging — verify with Get-Process and port check</li>
+      <li>Clock skew residual — though sync was applied, sub-second drift may matter</li>
+    </ol>
+
+    <h3>Next Steps on Unblock</h3>
+    <div class="diagram">
+<pre>1. Verify server alive (Get-Process sing-box, netstat :8443)
+2. Capture server stdout or enable file logging
+3. Test alternative server_name / fingerprint / keys
+4. Confirm egress IP change when handshake succeeds
+5. Phase 2.3: WFP Base Layer (block physical interfaces, allow TUN + Microsoft exception)
+6. Adversarial testing: boot leak, sleep/wake, tunnel crash, IfIndex volatility</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H6</span> Free Internet Access Strategy</h2>
+    <div class="history-box small">
+      <p>Transport-independent strategy for EMS-001 to reach the Internet from any region, starting with the Russian Federation (DPI environment).</p>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Tier</th><th>Transport</th><th>Cost</th><th>DPI (RU)</th><th>System-wide</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">Tier 0</td><td>Cloudflare WARP</td><td>Free</td><td class="cross">DEAD (verified)</td><td class="check">Yes</td><td class="cross">REJECTED for RU</td></tr>
+        <tr><td class="mono">Tier 1</td><td>VLESS+Reality (self-hosted / micro-VPS)</td><td>Free / ~$2/mo</td><td class="check">Strong</td><td class="check">Yes</td><td class="check">PRIMARY TARGET</td></tr>
+        <tr><td class="mono">Tier 2</td><td>Premium VPS</td><td>$5-10/mo</td><td class="check">Strong</td><td class="check">Yes</td><td class="neutral">For heavy tasks</td></tr>
+        <tr><td class="mono">Fallback A</td><td>Psiphon (VPN mode on phone + USB tether)</td><td>Free</td><td class="status-warn">Medium</td><td class="check">Yes</td><td class="check">Approved fallback</td></tr>
+        <tr><td class="mono">Fallback B</td><td>Tor + tun2socks (with bridges)</td><td>Free</td><td class="check">Strong</td><td class="check">Yes</td><td class="neutral">Emergency, high latency</td></tr>
+        <tr><td class="mono">Out</td><td>GoodbyeDPI / zapret / ByeDPI</td><td>Free</td><td class="status-warn">Medium</td><td class="cross">No</td><td class="cross">Out of scope</td></tr>
+        <tr><td class="mono">Out</td><td>Telegram configs</td><td>Free</td><td class="status-warn">Risk</td><td class="cross">No</td><td class="cross">Out of scope</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H7</span> Communication Rules</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>Roles</h3>
+        <ul class="compact-list">
+          <li><span class="label">Манни</span> <span class="value">Customer, Co-lead Developer, Chief Architect</span></li>
+          <li><span class="label">Асси</span> <span class="value">Lead Engineer (AI persona)</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Style</h3>
+        <ul class="compact-list">
+          <li><span class="label">Tone</span> <span class="value">Informal ("ты"), methodical</span></li>
+          <li><span class="label">Facts</span> <span class="value">Strict; no unverified info</span></li>
+          <li><span class="label">Corrections</span> <span class="value">Direct, no sugar-coating</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="history-box small" style="margin-top: 1rem;">
+      <p>Core rule: no changes "just in case". Every configuration change must follow the format: <strong>Почему (diagnostic reason) / Что (exact change) / Зачем (goal) / Проверка (acceptance test)</strong>.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-history"></div>
+    <h2><span class="num">§H8</span> Sources</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Source</th><th>Type</th><th>Compressed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">H1</td><td>Transition_to_Stage_1.md</td><td>Roadmap / Markdown</td><td>§H1 (OLMo selection, Stage 1 goals)</td></tr>
+        <tr><td class="mono">H2</td><td>Отчёт-Настройка EMS-001 по ADR-001.md</td><td>Report / Markdown</td><td>§H3 (RDP incident, diagnostic chain, fix steps)</td></tr>
+        <tr><td class="mono">H3</td><td>Настройка EMS-001 по ADR-001.txt</td><td>Dialogue / Text</td><td>§H1, §H3, §H4 (full engineering conversation)</td></tr>
+        <tr><td class="mono">H4</td><td>EMS-001_Context_Init_20260811.md</td><td>Context / Markdown</td><td>§H7 (roles, rules, baseline status)</td></tr>
+        <tr><td class="mono">H5</td><td>ТЗ для Асси.md</td><td>TZ / Markdown</td><td>§H1, §H7 (RU-001 baseline, communication rules)</td></tr>
+        <tr><td class="mono">H6</td><td>NETWORK_HANDOFF_RU-001.md</td><td>Handoff / Markdown</td><td>§H5, §H6 (Vector Alpha, WFP, free internet strategy)</td></tr>
+        <tr><td class="mono">H7</td><td>Structured Brief RU-001 EMS-001 конец сессии 17.08.2026</td><td>Brief / Markdown</td><td>§H5 (blocker state, file structure, next steps)</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- REVIEWS SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-reviews">R</div>
+    <h2>Reviews</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R1</span> Expert Review Summary</h2>
+    <div class="review-box">
+      <p>Three independent expert reviews (Copilot, Perplexity, DeepSeek) of the EMS-001 software baseline. Goal: define the minimal frozen stack for local OLMo/LLM360 research on a CPU-only Windows machine with 16 GB RAM and integrated Vega iGPU.</p>
+    </div>
+
+    <h3>Review Sources</h3>
+    <div class="review-tabs">
+      <span class="review-tab review-copilot">Copilot</span>
+      <span class="review-tab review-perplexity">Perplexity</span>
+      <span class="review-tab review-deepseek">DeepSeek</span>
+    </div>
+    <p class="caption">All three reviews agree on the core principle: CPU-only baseline, no CUDA/ROCm, no Docker, no cloud-dependent components. Disagreements are limited to package manager (uv vs venv/pip) and minor version choices.</p>
+  </section>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R2</span> Baseline Verdict — Python Stack</h2>
+    <div class="review-box small">
+      <p>Consensus: Python + PyTorch CPU + Hugging Face stack is the only realistic path. GPU acceleration is unavailable (Vega 8 does not support ROCm on Windows). All GPU-dependent tools (vLLM, Ollama, CUDA Toolkit, ROCm) are excluded.</p>
+    </div>
+
+    <table class="verdict-table">
+      <thead>
+        <tr><th>Component</th><th>Copilot</th><th>Perplexity</th><th>DeepSeek</th><th>Consensus</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Python</td><td class="must">3.10 MUST</td><td class="must">3.11 MUST</td><td class="must">3.12 MUST</td><td class="partial">3.10–3.12 acceptable; 3.11 recommended</td></tr>
+        <tr><td>Package manager</td><td class="must">uv MUST</td><td class="should">venv+pip MUST</td><td class="must">uv MUST</td><td class="partial">uv preferred (2 of 3); venv+pip valid fallback</td></tr>
+        <tr><td>PyTorch</td><td class="must">2.3.x CPU MUST</td><td class="must">CPU MUST</td><td class="must">2.4.x+ CPU MUST</td><td class="must">CPU build — unanimous</td></tr>
+        <tr><td>transformers</td><td class="should">4.43.x SHOULD</td><td class="must">≥4.48 MUST</td><td class="must">≥4.48 MUST</td><td class="must">≥4.48 — strong consensus</td></tr>
+        <tr><td>safetensors</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">Unanimous</td></tr>
+        <tr><td>tokenizers</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">Unanimous</td></tr>
+        <tr><td>huggingface_hub</td><td class="should">SHOULD</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST — 2 of 3</td></tr>
+        <tr><td>accelerate</td><td class="should">SHOULD</td><td class="should">SHOULD</td><td class="must">MUST</td><td class="should">SHOULD+ (include it)</td></tr>
+        <tr><td>ai2-olmo-core</td><td>—</td><td>—</td><td class="must">≥1.8.0 MUST</td><td class="should">SHOULD (DeepSeek only)</td></tr>
+        <tr><td>omegaconf</td><td>—</td><td>—</td><td class="must">MUST</td><td class="optional">Optional (DeepSeek only)</td></tr>
+        <tr><td>datasets</td><td>—</td><td class="should">SHOULD</td><td class="should">SHOULD</td><td class="should">SHOULD</td></tr>
+        <tr><td>torch-directml</td><td>—</td><td class="should">SHOULD/FALLBACK</td><td>—</td><td class="optional">Experimental fallback only</td></tr>
+        <tr><td>Git LFS</td><td class="should">SHOULD</td><td>—</td><td>—</td><td class="optional">Optional</td></tr>
+        <tr><td>numpy</td><td>—</td><td>—</td><td class="must">MUST</td><td class="must">Transitive MUST (always present)</td></tr>
+        <tr><td>Git</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">Unanimous</td></tr>
+        <tr><td>VS Code</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">Unanimous</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Key Disagreements</h3>
+    <div class="agreement-grid">
+      <div class="agreement-card">
+        <h4>Python Version <span class="partial">Partial</span></h4>
+        <p>Copilot recommends 3.10 (stability with PyTorch CPU + HF stack). Perplexity recommends 3.11 (mature for Windows, good balance). DeepSeek recommends 3.12 (LTS-образная ветка, OLMo requires ≥3.10). Resolution: 3.11 as the practical middle ground.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>Package Manager <span class="partial">Partial</span></h4>
+        <p>Copilot and DeepSeek insist on <span class="mono">uv</span> as MUST (fast, offline-friendly, replaces venv+pip). Perplexity considers <span class="mono">venv+pip</span> sufficient for baseline, with uv as future enhancement. Resolution: uv preferred for new environments; venv+pip acceptable if uv unavailable.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>accelerate <span class="partial">Partial</span></h4>
+        <p>Copilot and Perplexity mark it SHOULD (useful but not critical for CPU inference). DeepSeek marks it MUST (needed for optimized loading). Resolution: include it — the cost is low and the benefit is real for model loading and device mapping.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>huggingface_hub <span class="agree">Agree (2 of 3)</span></h4>
+        <p>Copilot marks SHOULD (only needed for HF repo management). Perplexity and DeepSeek mark MUST. Resolution: MUST — required for model download and local cache management before isolation.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>transformers Version <span class="agree">Agree</span></h4>
+        <p>Copilot suggests 4.43.x; Perplexity and DeepSeek require ≥4.48 (OLMo 2 compatibility). Resolution: ≥4.48 is the hard floor. Earlier versions may fail with current OLMo checkpoints.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>DirectML <span class="agree">Agree</span></h4>
+        <p>Only Perplexity mentions it (as SHOULD/FALLBACK). All agree: Vega 8 on Windows does not support ROCm; DirectML is experimental and should not be the baseline. CPU is the only reliable path.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R3</span> Baseline Verdict — VS Code Extensions</h2>
+    <div class="review-box small">
+      <p>Strong consensus on the core trio: Python + Pylance are mandatory. Jupyter is useful but optional. Everything else (AI assistants, Docker, Remote Development, cloud plugins) is rejected.</p>
+    </div>
+
+    <table class="verdict-table">
+      <thead>
+        <tr><th>Extension</th><th>Copilot</th><th>Perplexity</th><th>DeepSeek</th><th>Consensus</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">ms-python.python</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">Unanimous</td></tr>
+        <tr><td class="mono">ms-python.vscode-pylance</td><td class="should">SHOULD</td><td class="must">MUST</td><td class="must">MUST</td><td class="must">MUST — 2 of 3</td></tr>
+        <tr><td class="mono">ms-toolsai.jupyter</td><td class="should">SHOULD</td><td class="should">SHOULD</td><td class="should">SHOULD</td><td class="should">Unanimous SHOULD</td></tr>
+        <tr><td class="mono">redhat.vscode-yaml</td><td class="should">SHOULD</td><td class="should">SHOULD</td><td>—</td><td class="should">SHOULD</td></tr>
+        <tr><td class="mono">eamodio.gitlens</td><td class="optional">OPTIONAL</td><td class="reject">REJECT</td><td class="should">SHOULD</td><td class="optional">Optional / not baseline</td></tr>
+        <tr><td class="mono">editorconfig.editorconfig</td><td>—</td><td>—</td><td class="should">SHOULD</td><td class="optional">Optional</td></tr>
+        <tr><td class="mono">tamasfe.even-better-toml</td><td>—</td><td>—</td><td class="should">SHOULD</td><td class="optional">Optional</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Rejected Extensions (All Three Reviews)</h3>
+    <div class="diagram">
+<pre>GitHub Copilot, Codeium, Tabnine, Continue (AI assistants)
+Docker, Remote Development, Remote-SSH, Dev Containers
+Hugging Face extension, ML/LLM-specific extensions
+GitHub Pull Requests and Issues
+JavaScript/TypeScript extensions (not needed for Python research)
+Code Runner, Live Server, Live Share
+Additional theme/icon packs (not functional)</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R4</span> What NOT to Install</h2>
+    <div class="review-box small">
+      <p>All three reviews independently converged on the same exclusion list. No GPU stack, no containerization, no cloud-dependent runtimes, no AI assistants in the IDE.</p>
+    </div>
+
+    <table class="verdict-table">
+      <thead>
+        <tr><th>Category</th><th>Excluded Items</th><th>Reason</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GPU Stack</td><td>CUDA Toolkit, NVIDIA drivers, cuDNN, ROCm, torch-directml (as baseline)</td><td>No compatible GPU on EMS-001</td></tr>
+        <tr><td>Containerization</td><td>Docker, WSL, Dev Containers, Remote-SSH</td><td>Overhead, not needed for local research</td></tr>
+        <tr><td>Inference Servers</td><td>vLLM, Ollama</td><td>GPU-dependent or hide implementation details</td></tr>
+        <tr><td>AI Assistants</td><td>Copilot, Codeium, Tabnine, Continue</td><td>Cloud-dependent, telemetry risk</td></tr>
+        <tr><td>Cloud Sync</td><td>VS Code Settings Sync, GitHub Sync, cloud-dependent extensions</td><td>Must work offline after isolation</td></tr>
+        <tr><td>Training Frameworks</td><td>trl, deepspeed, bitsandbytes</td><td>Overkill for inference/research on 16 GB CPU</td></tr>
+        <tr><td>Optional Media</td><td>torchvision, torchaudio</td><td>Not needed for LLM research</td></tr>
+        <tr><td>Conda</td><td>Anaconda, Miniconda</td><td>Heavy, separate dependency resolver; uv or venv sufficient</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R5</span> Freeze / Isolation Checklist</h2>
+    <div class="review-box small">
+      <p>Before cutting EMS-001 off from external network access, verify that every component works offline and the model can be loaded without internet.</p>
+    </div>
+
+    <h3>Pre-Isolation Checklist</h3>
+    <ol class="freeze-check">
+      <li>Python installed and runs without internet</li>
+      <li>uv (or venv+pip) creates environments offline</li>
+      <li>PyTorch CPU imports successfully</li>
+      <li>transformers, safetensors, tokenizers, huggingface_hub import without errors</li>
+      <li>accelerate imports and can map device</li>
+      <li>Target model (OLMo or LLM360) downloaded locally with all shards</li>
+      <li>Tokenizer, config, generation config saved locally</li>
+      <li>CPU smoke test: tokenizer loads, model loads, minimal generation succeeds</li>
+      <li>Offline test with <span class="mono">HF_HUB_OFFLINE=1</span> and <span class="mono">TRANSFORMERS_OFFLINE=1</span></li>
+      <li>VS Code launches without cloud-sync attempts</li>
+      <li>All extensions work offline</li>
+      <li>Jupyter kernel registered and launches locally</li>
+      <li>Git works locally without auth prompts</li>
+      <li>GitHub CLI works for local repo operations</li>
+      <li>Auto-updates disabled for Python packages</li>
+      <li>VS Code telemetry and auto-update checks disabled</li>
+      <li>Full <span class="mono">pip freeze</span> or <span class="mono">uv pip freeze</span> lock file saved</li>
+      <li>All wheels or installation archive preserved locally</li>
+      <li>System restore point or disk image created</li>
+      <li>Confirmed: development can continue without external perimeter</li>
+    </ol>
+
+    <h3>Critical Unknowns (All Reviews)</h3>
+    <div class="agreement-grid">
+      <div class="agreement-card">
+        <h4>Exact Model Choice</h4>
+        <p>OLMo 1B vs LLM360 7B+ is a different memory and runtime scenario. Baseline must be fixed to a specific checkpoint, not a family.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>LoRA / Fine-tuning</h4>
+        <p>If LoRA is in the first-phase plan, <span class="mono">peft</span> becomes SHOULD. Otherwise it stays REJECT.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>Free Disk Space</h4>
+        <p>Model weights + Python env + datasets can consume 10–30 GB. Actual remaining SSD space after Windows and user data must be verified.</p>
+      </div>
+      <div class="agreement-card">
+        <h4>Jupyter vs Scripts</h4>
+        <p>If research is script-only, Jupyter can be deferred. If notebook workflow is planned, it must be pre-installed and kernel-registered before isolation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R6</span> Recommended Baseline (Synthesized)</h2>
+    <div class="review-box">
+      <p>Based on three independent reviews, the recommended frozen baseline for EMS-001 is a CPU-only Python 3.11 environment with PyTorch CPU, transformers ≥4.48, and minimal VS Code tooling. No GPU stack. No containers. No cloud dependencies.</p>
+    </div>
+
+    <h3>Core Stack</h3>
+    <div class="grid-4">
+      <div class="pill"><span class="pill-label">Python</span><span class="pill-value">3.11.x</span></div>
+      <div class="pill"><span class="pill-label">Package manager</span><span class="pill-value">uv (preferred) or venv+pip</span></div>
+      <div class="pill"><span class="pill-label">PyTorch</span><span class="pill-value">CPU build</span></div>
+      <div class="pill"><span class="pill-label">transformers</span><span class="pill-value">≥4.48</span></div>
+      <div class="pill"><span class="pill-label">safetensors</span><span class="pill-value">latest</span></div>
+      <div class="pill"><span class="pill-label">tokenizers</span><span class="pill-value">latest</span></div>
+      <div class="pill"><span class="pill-label">huggingface_hub</span><span class="pill-value">latest</span></div>
+      <div class="pill"><span class="pill-label">accelerate</span><span class="pill-value">latest</span></div>
+      <div class="pill"><span class="pill-label">datasets</span><span class="pill-value">latest (if needed)</span></div>
+      <div class="pill"><span class="pill-label">Git</span><span class="pill-value">already installed</span></div>
+      <div class="pill"><span class="pill-label">VS Code</span><span class="pill-value">stable x64</span></div>
+      <div class="pill"><span class="pill-label">Python ext</span><span class="pill-value">ms-python.python</span></div>
+      <div class="pill"><span class="pill-label">Pylance</span><span class="pill-value">ms-python.vscode-pylance</span></div>
+      <div class="pill"><span class="pill-label">Jupyter</span><span class="pill-value">ms-toolsai.jupyter</span></div>
+      <div class="pill"><span class="pill-label">YAML</span><span class="pill-value">redhat.vscode-yaml</span></div>
+    </div>
+
+    <h3>Recommended Directory Layout</h3>
+    <div class="diagram">
+<pre>D:\ISKIN├── env\                 # Python virtual environment
+├── src\                 # Project source code
+├── scripts\             # Automation and smoke tests
+├── notebooks\            # Jupyter notebooks
+├── models\              # Local model weights and configs
+├── datasets\            # Local datasets
+├── wheels\             # Offline package cache
+└── requirements-lock.txt</pre>
+    </div>
+
+    <h3>Smoke Test Command</h3>
+    <div class="diagram">
+<pre>python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+# Expected: version string + False (no CUDA)
+
+python -c "import transformers, safetensors, tokenizers, huggingface_hub, accelerate"
+# Expected: no errors
+
+# Offline verification:
+$env:HF_HUB_OFFLINE="1"; $env:TRANSFORMERS_OFFLINE="1"
+python -c "from transformers import AutoModel, AutoTokenizer; ..."
+# Expected: model loads from local cache, no network requests</pre>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-reviews"></div>
+    <h2><span class="num">§R7</span> Sources</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Source</th><th>Expert</th><th>Type</th><th>Compressed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">R1</td><td>Резолюции экспертов по ПО Малыша.md</td><td>Copilot</td><td>Review / Markdown</td><td>§R2, §R3, §R4, §R5 (baseline, extensions, exclusions, freeze checklist)</td></tr>
+        <tr><td class="mono">R2</td><td>Резолюции экспертов по ПО Малыша.md</td><td>Perplexity</td><td>Review / Markdown</td><td>§R2, §R3, §R4, §R5 (Python 3.11, venv+pip, DirectML fallback, directory layout)</td></tr>
+        <tr><td class="mono">R3</td><td>Резолюции экспертов по ПО Малыша.md</td><td>DeepSeek</td><td>Review / Markdown</td><td>§R2, §R3, §R4, §R5 (Python 3.12, uv, ai2-olmo-core, omegaconf)</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<!-- CHANGE REQUESTS SECTION -->
+<div class="major-section">
+  <div class="major-header">
+    <div class="major-icon icon-cr">C</div>
+    <h2>Change Requests</h2>
+  </div>
+
+  <section>
+    <div class="section-bar bar-cr"></div>
+    <h2><span class="num">§C1</span> CR-001 — Standard SMB File Exchange</h2>
+    <div class="cr-box">
+      <p>Change Request for a standard two-way file exchange channel between the Main PC and EMS-001, independent of RDP clipboard limitations. Status: <span class="cr-status-closed">CLOSED</span>.</p>
+    </div>
+
+    <div class="cr-card">
+      <h3>CR-001 Overview</h3>
+      <div class="cr-meta">
+        <div class="cr-meta-item"><span class="cr-label">ID</span><span class="cr-value">CR-001</span></div>
+        <div class="cr-meta-item"><span class="cr-label">Status</span><span class="cr-value" style="color:#166534;">CLOSED</span></div>
+        <div class="cr-meta-item"><span class="cr-label">Server</span><span class="cr-value">EMS-001 (192.168.0.102)</span></div>
+        <div class="cr-meta-item"><span class="cr-label">Share</span><span class="cr-value">\\192.168.0.102\iskin-exchange</span></div>
+        <div class="cr-meta-item"><span class="cr-label">Path</span><span class="cr-value">C:\iskin-exchange</span></div>
+        <div class="cr-meta-item"><span class="cr-label">Access</span><span class="cr-value">indeez (Full), no Everyone</span></div>
+      </div>
+    </div>
+
+    <h3>Server Configuration (EMS-001)</h3>
+    <table>
+      <thead>
+        <tr><th>Parameter</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Share name</td><td><span class="mono">iskin-exchange</span></td></tr>
+        <tr><td>Local path</td><td><span class="mono">C:\iskin-exchange\{incoming,outgoing,work}</span></td></tr>
+        <tr><td>Share permissions</td><td><span class="mono">indeez</span> — Full Control; Everyone — denied</td></tr>
+        <tr><td>NTFS permissions</td><td><span class="mono">indeez</span> — Full Control</td></tr>
+        <tr><td>Network profile</td><td>Private</td></tr>
+        <tr><td>LanmanServer</td><td>Running / Automatic</td></tr>
+        <tr><td>Firewall rule</td><td>File and Printer Sharing (SMB-In) — enabled</td></tr>
+        <tr><td>Persistence</td><td>Share, data and permissions survive reboot</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Client Configuration (Main PC)</h3>
+    <table>
+      <thead>
+        <tr><th>Parameter</th><th>Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Credential Manager entry</td><td><span class="mono">192.168.0.102</span> → <span class="mono">Beelink5800H\indeez</span> (saved)</td></tr>
+        <tr><td>Cold reconnect</td><td>OK without manual <span class="mono">net use</span></td></tr>
+        <tr><td>Drive mapping</td><td>Persistent UNC / mapped drive</td></tr>
+        <tr><td>Known issue</td><td>Without saved credentials client sends local username (<span class="mono">Сергей</span>) and gets error 1326/86</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Acceptance Tests</h3>
+    <div class="acceptance-grid">
+      <div class="acceptance-card">
+        <h4>Test 1 — EMS-001 → Main PC <span class="acc-pass">PASS</span></h4>
+        <p>EMS-001 creates file in <span class="mono">outgoing</span> folder. Main PC reads it successfully.</p>
+      </div>
+      <div class="acceptance-card">
+        <h4>Test 2 — Main PC → EMS-001 <span class="acc-pass">PASS</span></h4>
+        <p>Main PC modifies file and saves back. File is accessible from EMS-001.</p>
+      </div>
+      <div class="acceptance-card">
+        <h4>Test 3 — Reply channel <span class="acc-pass">PASS</span></h4>
+        <p>Main PC copies reply to <span class="mono">incoming</span> folder. EMS-001 confirms file presence.</p>
+      </div>
+      <div class="acceptance-card">
+        <h4>Test 4 — Reboot persistence <span class="acc-pass">PASS</span></h4>
+        <p>After EMS-001 reboot, share is accessible without reconfiguration. Credentials cached via Credential Manager.</p>
+      </div>
+    </div>
+
+    <h3>Known Behaviours</h3>
+    <ul class="compact-list">
+      <li><span class="label">SMB UI glitch</span> <span class="value">Windows 11 may prompt to install Windows Media Player when opening Network in Explorer. Workaround: use direct UNC paths (<span class="mono">\\192.168.0.102\iskin-exchange</span>) instead of Explorer Network view.</span></li>
+      <li><span class="label">Credential fallback</span> <span class="value">Without saved credentials, Windows tries local user (<span class="mono">Сергей</span>) and fails with error 1326/86. Fix: save credentials in Credential Manager.</span></li>
+      <li><span class="label">Clipboard independence</span> <span class="value">SMB exchange provides a reliable alternative to RDP clipboard (which has one-way limitation: Main PC → EMS-001 works, reverse does not).</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <div class="section-bar bar-cr"></div>
+    <h2><span class="num">§C2</span> Global Completion Status</h2>
+    <div class="cr-box small">
+      <p>Per TZ paragraph 20 (Completion Criterion): all conditions of the EMS-001 baseline setup have been fulfilled.</p>
+    </div>
+
+    <div class="acceptance-grid">
+      <div class="acceptance-card">
+        <h4>RDP <span class="acc-pass">COMPLETE</span></h4>
+        <p>Stable, reproducible, survives reboots, works with NLA. Session handoff tested: disconnect → reconnect → local login correctly steals session.</p>
+      </div>
+      <div class="acceptance-card">
+        <h4>Network & File Exchange (CR-001) <span class="acc-pass">COMPLETE</span></h4>
+        <p>Standard two-way SMB channel configured, access restricted, survives cold start.</p>
+      </div>
+      <div class="acceptance-card">
+        <h4>Engineering Environment <span class="acc-pass">COMPLETE</span></h4>
+        <p>Git and VS Code installed. Local code and file operations verified.</p>
+      </div>
+      <div class="acceptance-card">
+        <h4>Architectural Role <span class="acc-pass">CONFIRMED</span></h4>
+        <p>EMS-001 confirmed as fully autonomous Control / Orchestration Node. No Compute Node required for baseline tasks.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-bar bar-cr"></div>
+    <h2><span class="num">§C3</span> Sources</h2>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Source</th><th>Type</th><th>Compressed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">C1</td><td>Change Request EMS-001.md</td><td>Change Request / Text</td><td>§C1 (share config, client config, acceptance tests, known behaviours)</td></tr>
+        <tr><td class="mono">C2</td><td>CR-001 Stand SMB File Exchange.md</td><td>Status Report / Markdown</td><td>§C1, §C2 (completion status, global acceptance)</td></tr>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+</main>
+
+<footer>
+  Generated from 9 sources: ADR-001 (four-layer architecture), ADR-001 duplicate, «Окончательное ТЗ для инженера», «Характеристики машины», «Project Brief», «ОФИЦИАЛЬНЫЙ_ОТЧЁТ_BASELINE-0_Пункт_14_ТЗ», «EXP-001_Select_Reference_Model», «Анализ сетевой конфигурации. безопасности и впн от Эри», «Задание на экспертизу».<br>
+  Status: Accepted baseline. BASELINE-0 verified 2026-08-29. RAM expansion on EMS-001 is a capacity upgrade, not an architectural change. Active experiments: EXP-001, RU-001, EMS-001 Software Stack.
+</footer>
+
+</body>
+</html>
